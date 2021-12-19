@@ -17,10 +17,12 @@ import datasets
 import networks
 from IPython import embed
 
+full_res_shape = (608, 968)
+
 class Trainer:
     def __init__(self, options):
         now = datetime.now()
-        current_time_date = now.strftime("%d%m%Y-%H:%M:%S")
+        current_time_date = now.strftime("%d%m%Y_%H%M%S")
         self.opt = options
         self.log_path = os.path.join(self.opt.log_dir, self.opt.model_name, current_time_date)
 
@@ -77,8 +79,8 @@ class Trainer:
                     num_input_features=1,
                     num_frames_to_predict_for=2)
 
-            self.models["pose_encoder"].cuda()
-            self.models["pose"].cuda()
+            self.models["pose_encoder"].to(self.device)
+            self.models["pose"].to(self.device)
 
             self.parameters_to_train += list(self.models["pose"].parameters())
             self.parameters_to_train += list(self.models["pose_encoder"].parameters())
@@ -107,32 +109,43 @@ class Trainer:
         print("Training is using:\n  ", self.device)
 
         # data
-        datasets_dict = {"kitti": datasets.KITTIRAWDataset,
-                         "kitti_odom": datasets.KITTIOdomDataset,
-                         "vk2":datasets.VK2Dataset
-                         }
-        self.dataset_k = datasets_dict["kitti"]
+        if self.opt.dataset=='kitti':
+            datasets_dict = {"kitti": datasets.KITTIRAWDataset,
+                            "kitti_odom": datasets.KITTIOdomDataset}
+        elif self.opt.dataset=='aqualoc': # aqualoc
+            datasets_dict = {"aqualoc": datasets.AQUALOCDataset, # TODO continue here
+                            "aqualoc_imu": datasets.AQUALOCDataset}
+        elif self.opt.dataset=='sc': # aqualoc
+            datasets_dict = {"sc": datasets.SCDataset, # TODO continue here
+                            "sc_imu": datasets.SCDataset}               
+        elif self.opt.dataset=='uc': # aqualoc
+            datasets_dict = {"uc": datasets.UCanyonDataset, # TODO continue here
+                            "uc_imu": datasets.UCanyonDataset}               
+        elif self.opt.dataset=='flatiron': # aqualoc
+            datasets_dict = {"flatiron": datasets.UCanyonDataset, # TODO continue here
+                            "uc_imu": datasets.UCanyonDataset}               
+
+
+        self.dataset = datasets_dict[self.opt.dataset]
+
         fpath = os.path.join(os.path.dirname(__file__), "splits", self.opt.split, "{}_files.txt")
 
         #change trainset
-        train_filenames_k = readlines(fpath.format("train"))
+        train_filenames = readlines(fpath.format("train"))
         val_filenames = readlines(fpath.format("val"))
         img_ext = '.png' if self.opt.png else '.jpg'
-        num_train_samples = len(train_filenames_k)
+        num_train_samples = len(train_filenames)
         self.num_total_steps = num_train_samples // self.opt.batch_size * self.opt.num_epochs
         
-        #dataloader for kitti
-        train_dataset_k = self.dataset_k(
-            self.opt.data_path, train_filenames_k, self.opt.height, self.opt.width,
-            self.opt.frame_ids, 4, is_train=True, img_ext='.jpg')
-        self.train_loader_k = DataLoader(
-            train_dataset_k, self.opt.batch_size, True,
+        train_dataset = self.dataset(self.opt.dataset,
+            self.opt.data_path, train_filenames, self.opt.height, self.opt.width,
+            self.opt.frame_ids, 4, is_train=True, img_ext=img_ext, opts = self.opt)
+        self.train_loader = DataLoader(
+            train_dataset, self.opt.batch_size, True,
             num_workers=self.opt.num_workers, pin_memory=True, drop_last=True)
-        
-        #val_dataset = self.dataset(
-        val_dataset = datasets.KITTIRAWDataset( 
-            'data_path/kitti', val_filenames, self.opt.height, self.opt.width,
-            self.opt.frame_ids, 4, is_train=False, img_ext=img_ext)
+        val_dataset = self.dataset(self.opt.dataset,
+            self.opt.data_path, val_filenames, self.opt.height, self.opt.width,
+            self.opt.frame_ids, 4, is_train=False, img_ext=img_ext, opts = self.opt)
         self.val_loader = DataLoader(
             val_dataset, self.opt.batch_size, True,
             num_workers=self.opt.num_workers, pin_memory=True, drop_last=True)
@@ -142,7 +155,7 @@ class Trainer:
         if not self.opt.no_ssim:
             self.ssim = SSIM()
             self.ssim.to(self.device)
-        self.num_batch_k = train_dataset_k.__len__() // self.opt.batch_size
+        self.num_batch = train_dataset.__len__() // self.opt.batch_size
 
         self.backproject_depth = {}
         self.project_3d = {}
@@ -161,7 +174,7 @@ class Trainer:
 
         print("Using split:\n  ", self.opt.split)
         print("There are {:d} training items and {:d} validation items\n".format(
-            len(train_dataset_k), len(val_dataset)))
+            len(train_dataset), len(val_dataset)))
 
         self.save_opts()
 
@@ -203,7 +216,7 @@ class Trainer:
         self.set_train()
         self.every_epoch_start_time = time.time()
         
-        for batch_idx, inputs in enumerate(self.train_loader_k):
+        for batch_idx, inputs in enumerate(self.train_loader):
             before_op_time = time.time()
             outputs, losses = self.process_batch(inputs)
             self.model_optimizer.zero_grad()
@@ -483,7 +496,7 @@ class Trainer:
                 # add random numbers to break ties
                     #identity_reprojection_loss.shape).cuda() * 0.00001
                 if torch.cuda.is_available():
-                    identity_reprojection_loss += torch.randn(identity_reprojection_loss.shape).cuda() * 0.00001
+                    identity_reprojection_loss += torch.randn(identity_reprojection_loss.shape).to(self.device) * 0.00001
                 else:
                     identity_reprojection_loss += torch.randn(identity_reprojection_loss.shape).cpu() * 0.00001
                 combined = torch.cat((identity_reprojection_loss, reprojection_loss), dim=1)
@@ -523,7 +536,7 @@ class Trainer:
         """
         depth_pred = outputs[("depth", 0, 0)]
         depth_pred = torch.clamp(F.interpolate(
-            depth_pred, [375, 1242], mode="bilinear", align_corners=False), 1e-3, 80)
+            depth_pred, full_res_shape, mode="bilinear", align_corners=False), 1e-3, 80)
         depth_pred = depth_pred.detach()
 
         depth_gt = inputs["depth_gt"]
@@ -531,8 +544,8 @@ class Trainer:
 
         # garg/eigen crop
         crop_mask = torch.zeros_like(mask)
-        crop_mask[:, :, 153:371, 44:1197] = 1
-        mask = mask * crop_mask
+        # crop_mask[:, :, 153:371, 44:1197] = 1
+        # mask = mask * crop_mask
 
         depth_gt = depth_gt[mask]
         depth_pred = depth_pred[mask]

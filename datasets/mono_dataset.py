@@ -40,6 +40,7 @@ class MonoDataset(data.Dataset):
         img_ext
     """
     def __init__(self,
+                 dataName, 
                  data_path,
                  filenames,
                  height,
@@ -47,9 +48,10 @@ class MonoDataset(data.Dataset):
                  frame_idxs,
                  num_scales,
                  is_train=False,
-                 img_ext='.jpg'):#defualt = 'jpg'
+                 img_ext='.jpg',
+                 opts=None):
         super(MonoDataset, self).__init__()
-
+        self.dataName=dataName
         self.data_path = data_path
         self.filenames = filenames
         self.height = height
@@ -85,9 +87,10 @@ class MonoDataset(data.Dataset):
             s = 2 ** i
             self.resize[i] = transforms.Resize((self.height // s, self.width // s),
                                                interpolation=self.interp)
-
-        self.load_depth = self.check_depth()
-        self.load_depth_vk = self.check_depth_vk()
+        if opts is not None:
+            self.load_depth = opts.use_depth
+        else:
+            self.load_depth = self.check_depth()
 
     def preprocess(self, inputs, color_aug):
         """Resize colour images to the required scales and augment if required
@@ -163,6 +166,9 @@ class MonoDataset(data.Dataset):
                 inputs[("color", i, -1)] = self.get_color(folder, frame_index + i, side, do_flip)
                 # change color sapce
 
+        if 1: # sc/uc/flatiron
+            frameNum=int(line[0].split(',')[0])
+            inputs["frameNum"]=frameNum
 
         # adjusting intrinsics to match each scale in the pyramid
         for scale in range(self.num_scales):
@@ -193,10 +199,10 @@ class MonoDataset(data.Dataset):
             inputs["depth_gt"] = np.expand_dims(depth_gt, 0)
             inputs["depth_gt"] = torch.from_numpy(inputs["depth_gt"].astype(np.float32))
 
-        if self.load_depth_vk:
-            depth_gt_vk = self.get_depth_vk(folder, frame_index, side, do_flip)
+        if self.load_depth:
+            depth_gt = self.get_depth(folder, frame_index, side, do_flip)
             ## resize gt_depth from vkitti
-            inputs["depth_gt"] = np.expand_dims(depth_gt_vk,0)
+            inputs["depth_gt"] = np.expand_dims(depth_gt,0)
             inputs["depth_gt"] = torch.from_numpy(inputs["depth_gt"].astype(np.float32))
         
         if "s" in self.frame_idxs:

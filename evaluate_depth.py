@@ -77,6 +77,7 @@ def evaluate(opt):
     """
     MIN_DEPTH = 1e-3
     MAX_DEPTH = 80
+    device = torch.device("cpu" if opt.no_cuda else "cuda")
 
     assert sum((opt.eval_mono, opt.eval_stereo)) == 1, \
         "Please choose mono or stereo evaluation by setting either --eval_mono or --eval_stereo"
@@ -98,6 +99,9 @@ def evaluate(opt):
         dataset = datasets.KITTIRAWDataset(opt.data_path, filenames,
                                            encoder_dict['height'], encoder_dict['width'],
                                            [0], 4, is_train=False)
+		dataset = datasets.UCanyonDataset(opt.dataset, opt.data_path, filenames,
+                                           encoder_dict['height'], encoder_dict['width'],
+                                           [0], 4, is_train=False, opts = opt)								   
         dataloader = DataLoader(dataset, 16, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
         
@@ -125,7 +129,7 @@ def evaluate(opt):
                 i += 1
                 if torch.cuda.is_available():
                      
-                    input_color = data[("color", 0, 0)].cuda()
+                    input_color = data[("color", 0, 0)].to(device)
                 
                 else:
                     input_color = data[("color", 0, 0)].cpu()
@@ -170,17 +174,18 @@ def evaluate(opt):
         print("-> Evaluation disabled. Done.")
         quit()
 
-    elif opt.eval_split == 'benchmark':
+    elif opt.eval_split == 'benchmark' or opt.eval_split == 'uc':
         save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions")
         print("-> Saving out benchmark predictions to {}".format(save_dir))
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
         for idx in range(len(pred_disps)):
-            disp_resized = cv2.resize(pred_disps[idx], (1216, 352))
-            depth = STEREO_SCALE_FACTOR / disp_resized
-            depth = np.clip(depth, 0, 80)
-            depth = np.uint16(depth * 256)
+            disp_resized = cv2.resize(pred_disps[idx], (opt.width, opt.height))
+            depth = 1 / disp_resized
+            # depth = np.clip(depth, 0, 80)
+            # scaled_disp, depth = disp_to_depth(disp_resized, MIN_DEPTH, MAX_DEPTH)
+            depth = np.uint8(depth * 256)
             save_path = os.path.join(save_dir, "{:010d}.png".format(idx))
             cv2.imwrite(save_path, depth)
 
