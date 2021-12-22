@@ -515,8 +515,8 @@ class Trainer:
                 #doing this
                 to_optimise, idxs = torch.min(combined, dim=1)
             if not self.opt.disable_automasking:
-                #outputs["identity_selection/{}".format(scale)] = (
-                outputs["identity_selection/{}".format(0)] = (
+                outputs["identity_selection/{}".format(scale)] = (
+                # outputs["identity_selection/{}".format(0)] = (
                     idxs > identity_reprojection_loss.shape[1] - 1).float()
 
             loss += to_optimise.mean()
