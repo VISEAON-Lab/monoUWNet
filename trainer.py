@@ -367,7 +367,7 @@ class Trainer:
             if "depth_gt" in inputs:
                 self.compute_depth_losses(inputs, outputs, losses)
 
-            #self.log("val", inputs, outputs, losses)
+            self.log("val", inputs, outputs, losses)
             del inputs, outputs, losses
 
         self.set_train()
