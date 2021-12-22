@@ -363,6 +363,29 @@ class Trainer:
 
         with torch.no_grad():
             outputs, losses = self.process_batch(inputs)
+            ##
+            batch_idx=0
+            plt.set_cmap('jet')
+            saveDir = os.path.join(self.log_path, 'imgs')
+            if not os.path.exists(saveDir):
+                os.makedirs(saveDir)
+            inputColor = toNumpy(inputs['color', 0, 0]*255).astype(np.uint8)
+            
+            outPred = toNumpy((normalize_image(outputs['disp', 0])*255)).astype(np.uint8)
+            if self.opt.batch_size==1:
+                outPred = np.expand_dims(outPred,1)
+                inputColor = np.expand_dims(inputColor,0)
+            for j in range(self.opt.batch_size):
+                currPred = outPred[:,:,j]
+                currColor = inputColor[j,:]
+        
+                # if self.opt.load_depth:
+                #     gt_depth = (inputs['depth_gt'])
+                #     currGTDepth = toNumpy((normalize_image(gt_depth[j,:])*255)).astype(np.uint8)
+                #     plt.imsave(saveDir + "/frame_{:06d}_gtDepth.bmp".format(batch_idx+j), currGTDepth)
+
+                plt.imsave(saveDir + "/frame_{:06d}_color.bmp".format(batch_idx+j), currColor)
+                plt.imsave(saveDir + "/frame_{:06d}_pred.bmp".format(batch_idx+j), currPred)
 
             if "depth_gt" in inputs:
                 self.compute_depth_losses(inputs, outputs, losses)
