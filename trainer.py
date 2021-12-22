@@ -8,7 +8,10 @@ import torch.nn.functional as F
 from torchvision.transforms.functional import hflip
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from tensorboardX import SummaryWriter
+import matplotlib.pyplot as plt
 import json
+from my_utils import *
 import torchvision
 from utils import *
 from kitti_utils import *
@@ -151,6 +154,9 @@ class Trainer:
             num_workers=self.opt.num_workers, pin_memory=True, drop_last=True)
         self.val_iter = iter(self.val_loader)
 
+        self.writers = {}
+        for mode in ["train", "val"]:
+            self.writers[mode] = SummaryWriter(os.path.join(self.log_path, mode))
 
         if not self.opt.no_ssim:
             self.ssim = SSIM()
@@ -570,10 +576,10 @@ class Trainer:
         print(print_string.format(self.epoch, batch_idx, samples_per_sec, loss,
                                   sec_to_hm_str(time_sofar), sec_to_hm_str(training_time_left)))
 
-    def log(self, mode, inputs, outputs, losses):
+    def log(self, mode, inputs, outputs, losses, batch_idx=0):
         """Write an event to the tensorboard events file
         """
-        #writer = self.writers[mode]
+        writer = self.writers[mode]
         for l, v in losses.items():
             writer.add_scalar("{}".format(l), v, self.step)
 
