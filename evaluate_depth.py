@@ -173,8 +173,8 @@ def evaluate(opt):
                 pred_disp = batch_post_process_disparity(pred_disp[:N], pred_disp[N:, :, ::-1])
 
             pred_disps.append(pred_disp)
-            input_colors.append(toNumpy(input_color))
-            gt_depths.append(np.squeeze(gt))
+            input_colors.append(toNumpy(input_color.cpu()))
+            gt_depths.append(np.squeeze(gt.cpu()))
 
         # end_time = time.time()
         # inferring = end_time - init_time
