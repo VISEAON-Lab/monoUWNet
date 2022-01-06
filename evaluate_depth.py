@@ -130,7 +130,7 @@ def evaluate(opt):
 
     dataloader = DataLoader(dataset, 16, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
-        
+     # TODO: check b4 the change if something hapened!!   
     encoder = networks.test_hr_encoder.hrnet18(False)
     encoder.num_ch_enc = [ 64, 18, 36, 72, 144 ]
     depth_decoder = networks.HRDepthDecoder(encoder.num_ch_enc, opt.scales)
