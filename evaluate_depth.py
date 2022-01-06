@@ -152,7 +152,7 @@ def evaluate(opt):
         encoder_dict['width'], encoder_dict['height']))
 
     with torch.no_grad():
-        init_time = time.time()
+        # init_time = time.time()
         i = 0 
         for data in dataloader:
             i += 1  
@@ -176,9 +176,9 @@ def evaluate(opt):
             input_colors.append(toNumpy(input_color))
             gt_depths.append(np.squeeze(gt))
 
-        end_time = time.time()
-        inferring = end_time - init_time
-        print("===>total time:{}".format(sec_to_hm_str(inferring)))
+        # end_time = time.time()
+        # inferring = end_time - init_time
+        # print("===>total time:{}".format(sec_to_hm_str(inferring)))
 
     pred_disps = np.concatenate(pred_disps)
     input_colors = np.concatenate(input_colors)
