@@ -39,6 +39,33 @@ class ToTensor(object):
 to_tensor = ToTensor()
 to_float_tensor = lambda x: to_tensor(x).float()
 
+def normalize_image(x):
+    """Rescale image pixels to span range [0, 1]
+    """
+    ma = float(x.max().cpu().data)
+    mi = float(x.min().cpu().data)
+    d = ma - mi if ma != mi else 1e5
+    return (x - mi) / d
+
+
+def normalize_numpy(x):
+    """Rescale image pixels to span range [0, 1]
+    """
+    ma = (x.max())
+    mi = (x.min())
+    d = ma - mi if ma != mi else 1e5
+    return (x - mi) / d
+
+def normalize_tensor(x):
+    """Rescale image pixels to span range [0, 1]
+    """
+    ma = (x.max())
+    mi = (x.min())
+    d = ma - mi if ma != mi else 1e5
+    return (x - mi) / d
+
+
+
 def rgb2gray(rgb):
 
     r, g, b = rgb[:,:,0], rgb[:,:,1], rgb[:,:,2]
