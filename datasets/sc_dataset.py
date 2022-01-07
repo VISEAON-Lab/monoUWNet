@@ -10,8 +10,9 @@ import os
 import skimage.transform
 import numpy as np
 import PIL.Image as pil
-
-from kitti_utils import generate_depth_map
+import cv2
+from my_utils import *
+import glob
 from .mono_dataset import MonoDataset
 
 class SCDataset(MonoDataset):
@@ -61,8 +62,39 @@ class SCDataset(MonoDataset):
             frameName = self.filenames[idx].split(',')[1]
         f_str = frameName
         image_path = os.path.join(
-            self.data_path,
+            self.data_path, 'imgs',
             f_str)
         return image_path
+
+    def get_depth_path(self, folder, frame_index, side):
+        idx, frameName = folder.split(',')
+        idx = int(idx)
+        try:
+            frameName = self.filenames[idx+frame_index].split(',')[1]
+        except:
+            frameName = self.filenames[idx].split(',')[1]
+        f_str = frameName
+        f_str = f_str[3:-8]+'*_SeaErra_abs_depth.tif'
+        image_path = os.path.join(
+            self.data_path, 'depth',
+            f_str)
+        files = glob.glob(image_path)
+        return files[0]
+
+    
+    def get_depth(self, folder, frame_index, side, do_flip):
+        depth_path = self.get_depth_path(folder, frame_index, side)
+        try:
+            depth_gt = pil.open(depth_path)
+        except:
+            return None
+        depth_gt = depth_gt.resize(self.full_res_shape, pil.NEAREST)
+        depth_gt = np.array(depth_gt).astype(np.float32)
+        # depth_gt = preProcessDepth(depth_gt)
+
+        if do_flip:
+            depth_gt = np.fliplr(depth_gt)
+
+        return depth_gt 
         
 
