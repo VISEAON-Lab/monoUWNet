@@ -1,6 +1,7 @@
 python evaluate_depth.py  \
---load_weights_folder ~/tmp_hpc/mono_model/29112021-11:57:35/models/weights_2 \ 
 --eval_mono \
---data_path data_path/kitti \
+--load_weights_folder=/home/samitai/tmp_hpc/20212212_mono_sc_model/22122021_152304/models/weights_19 \
+--data_path /home/samitai/Work/Datasets/ANSFL/allData \
 --save_pred_disps \
---use_depth
+--use_depth \
+--eval_split uc

@@ -79,6 +79,7 @@ class SCDataset(MonoDataset):
             self.data_path, 'depth',
             f_str)
         files = glob.glob(image_path)
+        print(image_path)
         return files[0]
 
     
