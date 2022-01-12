@@ -266,3 +266,22 @@ def compute_depth_errors(gt, pred):
     sq_rel = torch.mean((gt - pred) ** 2 / gt)
 
     return abs_rel, sq_rel, rmse, rmse_log, a1, a2, a3
+
+
+
+
+class CorrelationLoss(nn.Module):
+    def __init__(self):
+        super(CorrelationLoss, self).__init__()
+
+    def forward(self, rgb, target, pred):
+        assert pred.dim() == target.dim(), "inconsistent dimensions"
+        BG_R = torch.max(rgb[:,1:, :,:], dim=1, keepdim=True)[0] - torch.unsqueeze(rgb[:,0,:,:], dim=1)
+        valid_mask = (pred>0).detach()
+        num1 = torch.sum(pred[valid_mask]-torch.mean(pred[valid_mask]))
+        num2 = torch.sum(BG_R[valid_mask]-torch.mean(BG_R[valid_mask]))
+        den1 = torch.sum((pred[valid_mask]-torch.mean(pred[valid_mask]))**2)
+        den2 = torch.sum((BG_R[valid_mask]-torch.mean(BG_R[valid_mask]))**2)
+        self.loss = 1 - num1*num2/torch.sqrt(den1*den2)
+        self.loss = self.loss.mean()
+        return self.loss

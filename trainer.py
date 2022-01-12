@@ -22,6 +22,8 @@ from IPython import embed
 
 full_res_shape = (608, 968)
 
+corr_loss = CorrelationLoss()
+
 class Trainer:
     def __init__(self, options):
         now = datetime.now()
@@ -552,6 +554,11 @@ class Trainer:
             losses["loss/{}".format(scale)] = loss
         
         total_loss /= self.num_scales
+
+        # correlation loss
+        corrLoss = corr_loss(inputs[("color", 0, 0)], inputs[("color", 0, 0)], outputs[('depth', 0, 0)])
+        total_loss += (0.01*corrLoss)
+
         losses["loss"] = total_loss 
         return losses
 
