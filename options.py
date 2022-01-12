@@ -19,7 +19,7 @@ class MonodepthOptions:
         self.parser.add_argument("--log_dir",
                                  type=str,
                                  help="log directory",
-                                 default=os.path.join(os.path.expanduser("~"), "tmp_hpc"))
+                                 default="models")
 
         # TRAINING options
         self.parser.add_argument("--model_name",
