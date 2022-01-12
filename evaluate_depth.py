@@ -114,8 +114,9 @@ def evaluate(opt):
     encoder_path = os.path.join(opt.load_weights_folder, "encoder.pth")
     decoder_path = os.path.join(opt.load_weights_folder, "depth.pth")
     
-    encoder_dict = torch.load(encoder_path) if torch.cuda.is_available() else torch.load(encoder_path,map_location = 'cpu')
-    decoder_dict = torch.load(decoder_path) if torch.cuda.is_available() else torch.load(encoder_path,map_location = 'cpu')
+    encoder_dict = torch.load(encoder_path, map_location=torch.device(device)) 
+    # decoder_dict = torch.load(decoder_path) if torch.cuda.is_available() else torch.load(encoder_path,map_location = 'cpu')
+    decoder_dict = torch.load(decoder_path, map_location=torch.device(device)) 
     # dataset = datasets.KITTIRAWDataset(opt.data_path, filenames,
                                         #    encoder_dict['height'], encoder_dict['width'],
                                         #    [0], 4, is_train=False)

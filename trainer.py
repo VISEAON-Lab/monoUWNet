@@ -373,10 +373,10 @@ class Trainer:
             
             outPred = toNumpy((normalize_image(outputs['disp', 0])*255)).astype(np.uint8)
             if self.opt.batch_size==1:
-                outPred = np.expand_dims(outPred,1)
+                outPred = np.expand_dims(outPred,0)
                 inputColor = np.expand_dims(inputColor,0)
             for j in range(self.opt.batch_size):
-                currPred = outPred[:,:,j]
+                currPred = outPred[j,:]
                 currColor = inputColor[j,:]
         
                 # if self.opt.load_depth:
