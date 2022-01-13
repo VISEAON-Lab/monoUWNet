@@ -72,8 +72,10 @@ def rgb2gray(rgb):
     gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
     return gray
 
-def toNumpy(tensorIm):
-    im = np.squeeze(tensorIm.cpu().detach().numpy())
+def toNumpy(tensorIm, keepDim=False):
+    im = tensorIm.cpu().detach().numpy()
+    if not keepDim:
+        im = np.squeeze(im)
     if im.ndim == 3:
         im = im.transpose((1, 2, 0))
     if im.ndim == 4:

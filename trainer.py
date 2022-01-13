@@ -371,15 +371,15 @@ class Trainer:
             saveDir = os.path.join(self.log_path, 'imgs')
             if not os.path.exists(saveDir):
                 os.makedirs(saveDir)
-            inputColor = toNumpy(inputs['color', 0, 0]*255).astype(np.uint8)
+            inputColor = toNumpy(inputs['color', 0, 0]*255, keepDim=True).astype(np.uint8)
             
-            outPred = toNumpy((normalize_image(outputs['disp', 0])*255)).astype(np.uint8)
-            if self.opt.batch_size==1:
-                outPred = np.expand_dims(outPred,0)
-                inputColor = np.expand_dims(inputColor,0)
+            outPred = toNumpy(normalize_image(outputs['disp', 0])*255, keepDim=True).astype(np.uint8)
+            # if self.opt.batch_size==1:
+            #     outPred = np.expand_dims(outPred,0)
+            #     inputColor = np.expand_dims(inputColor,0)
             for j in range(self.opt.batch_size):
-                currPred = outPred[j,:]
-                currColor = inputColor[j,:]
+                currPred = np.squeeze(outPred[j,:])
+                currColor = np.squeeze(inputColor[j,:])
         
                 # if self.opt.load_depth:
                 #     gt_depth = (inputs['depth_gt'])
