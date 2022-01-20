@@ -27,9 +27,9 @@ corr_loss = CorrelationLoss()
 class Trainer:
     def __init__(self, options):
         now = datetime.now()
-        current_time_date = now.strftime("%d%m%Y_%H%M%S")
+        # current_time_date = now.strftime("%d%m%Y_%H%M%S")
         self.opt = options
-        self.log_path = os.path.join(self.opt.log_dir, self.opt.model_name, current_time_date)
+        self.log_path = os.path.join(self.opt.log_dir, self.opt.model_name)
 
         # checking height and width are multiples of 32
         assert self.opt.height % 32 == 0, "'height' must be a multiple of 32"
@@ -213,6 +213,7 @@ class Trainer:
             self.run_epoch()
             if (self.epoch + 1) % self.opt.save_frequency == 0:#number of epochs between each save defualt =1
                 self.save_model()
+                self.save_model(isLast=True)
         self.total_training_time = time.time() - self.init_time
         print('====>total training time:{}'.format(sec_to_hm_str(self.total_training_time)))
 
@@ -557,7 +558,7 @@ class Trainer:
 
         # correlation loss
         corrLoss = corr_loss(inputs[("color", 0, 0)], inputs[("color", 0, 0)], outputs[('depth', 0, 0)])
-        total_loss += (0.001*corrLoss)
+        total_loss += (0.0001*corrLoss)
 
         losses["loss"] = total_loss 
         return losses
@@ -651,10 +652,14 @@ class Trainer:
         with open(os.path.join(models_dir, 'opt.json'), 'w') as f:
             json.dump(to_save, f, indent=2)
 
-    def save_model(self):
+    def save_model(self, isLast=False):
         """Save model weights to disk
         """
-        save_folder = os.path.join(self.log_path, "models", "weights_{}".format(self.epoch))
+        if isLast:
+            name='last'
+        else:
+            name=self.epoch
+        save_folder = os.path.join(self.log_path, "models", "weights_{}".format(name))
         if not os.path.exists(save_folder):
             os.makedirs(save_folder)
 
