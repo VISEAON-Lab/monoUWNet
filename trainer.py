@@ -557,7 +557,7 @@ class Trainer:
 
         # correlation loss
         corrLoss = corr_loss(inputs[("color", 0, 0)], inputs[("color", 0, 0)], outputs[('depth', 0, 0)])
-        total_loss += (0.1*corrLoss)
+        total_loss += (0.001*corrLoss)
 
         losses["loss"] = total_loss 
         return losses

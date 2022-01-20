@@ -174,7 +174,7 @@ def evaluate(opt):
                 pred_disp = batch_post_process_disparity(pred_disp[:N], pred_disp[N:, :, ::-1])
 
             pred_disps.append(pred_disp)
-            input_colors.append(toNumpy(input_color.cpu()))
+            input_colors.append(toNumpy(input_color.cpu(), keepDim=True))
             gt_depths.append((gt.cpu()))
 
         # end_time = time.time()
@@ -215,6 +215,7 @@ def evaluate(opt):
     for i in range(pred_disps.shape[0]):
 
         gt_depth = gt_depths[i]
+        gt_depth = np.squeeze(gt_depth)
         gt_height, gt_width = gt_depth.shape[:2]
 
         pred_disp = pred_disps[i]
@@ -243,6 +244,7 @@ def evaluate(opt):
         disp_resized = cv2.resize(pred_disps[i], (opt.width, opt.height))
         outPred = (normalize_numpy(pred_disps[i])*255).astype(np.uint8)
         inGT = (normalize_numpy(gt_depths[i])*255).astype(np.uint8)
+        inGT = np.squeeze(inGT)
         inputColor = input_colors[i]
         # depth = 32.779243 / disp_resized
         # depth = np.clip(depth, 0, 80)/10
