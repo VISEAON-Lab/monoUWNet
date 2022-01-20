@@ -13,7 +13,7 @@ import torch
 from torchvision import transforms, datasets
 from cv2 import imwrite
 import networks
-import hr_networks
+# import hr_networks
 from layers import disp_to_depth
 from utils import download_model_if_doesnt_exist
 
@@ -58,10 +58,10 @@ def test_simple(args):
     else:
             device = "cpu"
 
-    model_path = os.path.join(args.model_folder, args.model_name)
-    print("-> Loading model from ", model_path)
-    encoder_path = os.path.join(model_path, "encoder.pth")
-    depth_decoder_path = os.path.join(model_path, "depth.pth")
+    # model_path = os.path.join(args.model_folder, args.model_name)
+    print("-> Loading model from ", args.model_folder)
+    encoder_path = os.path.join(args.model_folder, "encoder.pth")
+    depth_decoder_path = os.path.join(args.model_folder, "depth.pth")
 
     # LOADING PRETRAINED MODEL
     print("   Loading pretrained encoder")
@@ -99,7 +99,7 @@ def test_simple(args):
         output_directory = os.path.dirname(args.image_path)
     elif os.path.isdir(args.image_path):
         # Searching folder for images
-        paths = glob.glob(os.path.join(args.image_path, '*.{}'.format('png')))
+        paths = glob.glob(os.path.join(args.image_path, '*.{}'.format('bmp')))
         output_directory = args.image_path
     else:
         raise Exception("Can not find args.image_path: {}".format(args.image_path))
@@ -107,16 +107,18 @@ def test_simple(args):
     print("-> Predicting on {:d} test images".format(len(paths)))
 
     # PREDICTING ON EACH IMAGE IN TURN
+    idx2run=15
     with torch.no_grad():
         for idx, image_path in enumerate(paths):
-
+            # if idx is not idx2run:
+            #     continue
             if image_path.endswith("_disp.jpg"):
                 # don't try to predict disparity for a disparity image!
                 continue
 
             # Load image and preprocess
             input_image = pil.open(image_path).convert('RGB')
-            image_name =  args.model_folder[39:-8] + args.model_name[7:] +  args.image_path[7:-4] 
+            image_name =  image_path.split('/')[-1][:-4] 
             rgb = transforms.ToTensor()(input_image)
             
             original_width, original_height = input_image.size

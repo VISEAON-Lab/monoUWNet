@@ -6,6 +6,7 @@ import torch.nn as nn
 from collections import OrderedDict
 from hr_layers import *
 from layers import upsample
+from my_utils import plotTensorMultiple
 
 class HRDepthDecoder(nn.Module):
     def __init__(self, num_ch_enc, scales=range(4), num_output_channels=1, mobile_encoder=False):
@@ -54,7 +55,7 @@ class HRDepthDecoder(nn.Module):
         x18 = self.convs["18"](x36 , feature18)
         x9 = self.convs["9"](x18,[feature64])
         x6 = self.convs["up_x9_1"](upsample(self.convs["up_x9_0"](x9)))
-        
+
         outputs[("disp",0)] = self.sigmoid(self.convs["dispConvScale0"](x6))
         outputs[("disp",1)] = self.sigmoid(self.convs["dispConvScale1"](x9))
         outputs[("disp",2)] = self.sigmoid(self.convs["dispConvScale2"](x18))

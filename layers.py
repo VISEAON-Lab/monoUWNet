@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from my_utils import *
 
 def disp_to_depth(disp, min_depth, max_depth):
     """Convert network's sigmoid output into depth prediction
@@ -278,10 +278,11 @@ class CorrelationLoss(nn.Module):
         assert pred.dim() == target.dim(), "inconsistent dimensions"
         BG_R = torch.max(rgb[:,1:, :,:], dim=1, keepdim=True)[0] - torch.unsqueeze(rgb[:,0,:,:], dim=1)
         valid_mask = (pred>0).detach()
-        num1 = torch.sum(pred[valid_mask]-torch.mean(pred[valid_mask]))
-        num2 = torch.sum(BG_R[valid_mask]-torch.mean(BG_R[valid_mask]))
+        num1 = pred[valid_mask]-torch.mean(pred[valid_mask])
+        num2 = BG_R[valid_mask]-torch.mean(BG_R[valid_mask])
+        num = torch.sum(num1*num2)
         den1 = torch.sum((pred[valid_mask]-torch.mean(pred[valid_mask]))**2)
         den2 = torch.sum((BG_R[valid_mask]-torch.mean(BG_R[valid_mask]))**2)
-        self.loss = 1 - num1*num2/torch.sqrt(den1*den2)
+        self.loss = 1 - num/torch.sqrt(den1*den2)
         self.loss = self.loss.mean()
         return self.loss

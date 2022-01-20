@@ -129,7 +129,7 @@ def evaluate(opt):
                                         encoder_dict['height'], encoder_dict['width'],
                                         [0], 4, is_train=False, opts = opt)
 
-    dataloader = DataLoader(dataset, 16, shuffle=False, num_workers=opt.num_workers,
+    dataloader = DataLoader(dataset, 1, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
      # TODO: check b4 the change if something hapened!!   
     encoder = networks.test_hr_encoder.hrnet18(False)
