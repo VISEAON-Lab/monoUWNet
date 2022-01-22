@@ -185,12 +185,6 @@ def evaluate(opt):
     input_colors = np.concatenate(input_colors)
     gt_depths = np.concatenate(gt_depths)
   
-   
-    output_path = os.path.join(
-            opt.load_weights_folder, "benchmark_predictions"+opt.model_name, "disps_{}_split.npy".format(opt.eval_split))
-    print("-> Saving predicted disparities to ", output_path)
-    np.save(output_path, pred_disps)
-
     
     
     save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions"+opt.model_name)
@@ -199,6 +193,11 @@ def evaluate(opt):
         os.makedirs(save_dir)
 
  
+    output_path = os.path.join(
+            opt.load_weights_folder, "benchmark_predictions"+opt.model_name, "disps_{}_split.npy".format(opt.eval_split))
+    print("-> Saving predicted disparities to ", output_path)
+    np.save(output_path, pred_disps)
+
 
 
 
