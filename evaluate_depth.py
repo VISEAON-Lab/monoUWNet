@@ -270,13 +270,13 @@ def evaluate(opt):
     time = str(datetime.now().isoformat(' ', 'seconds'))
     resdict = {
         "time": time,
-        "abs_rel": mean_errors[0],
-        "sq_rel": mean_errors[1],
-        "rmse": mean_errors[2],
-        "rmse_log": mean_errors[3],
-        "a1": mean_errors[4],
-        "a2": mean_errors[5],
-        "a3": mean_errors[6],
+        "abs_rel": np.round(mean_errors[0],3),
+        "sq_rel": np.round(mean_errors[1],3),
+        "rmse": np.round(mean_errors[2],3),
+        "rmse_log": np.round(mean_errors[3],3),
+        "a1": np.round(mean_errors[4],3),
+        "a2": np.round(mean_errors[5],3),
+        "a3": np.round(mean_errors[6],3),
         }
     writer.writerow(resdict.keys())
     writer.writerow(resdict.values())
