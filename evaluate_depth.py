@@ -81,18 +81,7 @@ def batch_post_process_disparity(l_disp, r_disp):
 
 def evaluate(opt):
     params = vars(opt)
-    # open log file
-    f = open('logger.csv','a')
-    writer = csv.writer(f)
-    headline=[" "] 
-    writer.writerow(headline)
-    headline=[opt.model_name]
-    writer.writerow(headline)
-    writer.writerow(params.keys())
-    writer.writerow(params.values())
-    f.close()
-    
-    
+      
     """Evaluates a pretrained model using a specified test set
     """
     MIN_DEPTH = 1e-3
@@ -268,8 +257,16 @@ def evaluate(opt):
     print("\n-> Done!")
 
     # log to file
+    
     f = open('logger.csv','a')
     writer = csv.writer(f)
+    headline=[" "] 
+    writer.writerow(headline)
+    headline=[opt.model_name]
+    writer.writerow(headline)
+    writer.writerow(params.keys())
+    writer.writerow(params.values())
+
     time = str(datetime.now().isoformat(' ', 'seconds'))
     resdict = {
         "time": time,
