@@ -32,7 +32,20 @@ class UCanyonDataset(MonoDataset):
                            [0, 0, 1, 0],
                            [0, 0, 0, 1]], dtype=np.float32)
 
-        
+        self.K2 = np.array([[1184/self.full_res_shape[0], 0, 482.3459505/self.full_res_shape[0], 0],
+                           [0, 1184/self.full_res_shape[1], 289.101975/self.full_res_shape[1], 0],
+                           [0, 0, 1, 0],
+                           [0, 0, 0, 1]], dtype=np.float32)
+
+        self.distCoeffs = np.array([-0.133974, 0.15196, 0.0359522, 0.000293189, -0.00212398])
+        self.cameraMatrix = self.K[:3, :3]
+        self.cameraMatrix[0,:]*=self.full_res_shape[0]
+        self.cameraMatrix[1,:]*=self.full_res_shape[1]
+        self.newCameraMatrix, self.roi = cv2.getOptimalNewCameraMatrix(self.cameraMatrix, self.distCoeffs, self.full_res_shape, 1, self.full_res_shape)
+        self.K[0,0] = self.newCameraMatrix[0,0]/(self.roi[2]-self.roi[0])
+        self.K[0,2] = self.newCameraMatrix[0,2]/(self.roi[2]-self.roi[0])
+        self.K[1,1] = self.newCameraMatrix[1,1]/(self.roi[3]-self.roi[1])
+        self.K[1,2] = self.newCameraMatrix[1,2]/(self.roi[3]-self.roi[1])
         self.side_map = {"2": 2, "3": 3, "l": 2, "r": 3}
 
     def check_depth(self):
@@ -48,11 +61,18 @@ class UCanyonDataset(MonoDataset):
 
     def get_color(self, folder, frame_index, side, do_flip):
         color = self.loader(self.get_image_path(folder, frame_index, side))
-
+        K = self.K[:3, :3].copy()
+        K[0,:]*=self.full_res_shape[0]
+        K[1,:]*=self.full_res_shape[1]
+        undistorted_img = cv2.undistort(np.array(color), self.cameraMatrix, self.distCoeffs, self.newCameraMatrix)
+        roi = self.roi
+        # undistorted_img = undistorted_img[roi[1]:roi[3], roi[0]:roi[2]]
+        self.full_res_shape = (undistorted_img.shape[1], undistorted_img.shape[0])
+        undistorted_img=pil.fromarray(undistorted_img)
         if do_flip:
             color = color.transpose(pil.FLIP_LEFT_RIGHT)
 
-        return color
+        return undistorted_img
 
     def get_image_path(self, folder, frame_index, side):
         idx, frameName = folder.split(',')
