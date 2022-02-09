@@ -38,7 +38,7 @@ class UCanyonDataset(MonoDataset):
                            [0, 0, 0, 1]], dtype=np.float32)
 
         self.distCoeffs = np.array([-0.133974, 0.15196, 0.0359522, 0.000293189, -0.00212398])
-        self.cameraMatrix = self.K[:3, :3]
+        self.cameraMatrix = self.K[:3, :3].copy()
         self.cameraMatrix[0,:]*=self.full_res_shape[0]
         self.cameraMatrix[1,:]*=self.full_res_shape[1]
         self.newCameraMatrix, self.roi = cv2.getOptimalNewCameraMatrix(self.cameraMatrix, self.distCoeffs, self.full_res_shape, 1, self.full_res_shape)
