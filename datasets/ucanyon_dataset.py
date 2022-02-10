@@ -27,12 +27,12 @@ class UCanyonDataset(MonoDataset):
         # by 1 / image_height. Monodepth2 assumes a principal point to be exactly centered.
         # If your principal point is far from the center you might need to disable the horizontal
         # flip augmentation.
-        self.K = np.array([[1215.4715960880724/self.full_res_shape[0], 0, 423.99891909157924/self.full_res_shape[0], 0],
+        self.K_prev = np.array([[1215.4715960880724/self.full_res_shape[0], 0, 423.99891909157924/self.full_res_shape[0], 0],
                            [0, 1211.2257944573676/self.full_res_shape[1], 293.91172138607783/self.full_res_shape[1], 0],
                            [0, 0, 1, 0],
                            [0, 0, 0, 1]], dtype=np.float32)
 
-        self.K2 = np.array([[1184/self.full_res_shape[0], 0, 482.3459505/self.full_res_shape[0], 0],
+        self.K = np.array([[1184/self.full_res_shape[0], 0, 482.3459505/self.full_res_shape[0], 0],
                            [0, 1184/self.full_res_shape[1], 289.101975/self.full_res_shape[1], 0],
                            [0, 0, 1, 0],
                            [0, 0, 0, 1]], dtype=np.float32)
