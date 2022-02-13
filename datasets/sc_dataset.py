@@ -52,7 +52,7 @@ class SCDataset(MonoDataset):
         if do_flip:
             color = color.transpose(pil.FLIP_LEFT_RIGHT)
 
-        hf_color = homorphicFiltering(color)
+        hf_color = pil.fromarray(homorphicFiltering(color))
         return hf_color
 
         # return color
