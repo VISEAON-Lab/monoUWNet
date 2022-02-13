@@ -3,7 +3,8 @@ import os
 import hashlib
 import zipfile
 from six.moves import urllib
-
+import numpy as np
+import cv2
 
 def readlines(filename):
     """Read all the lines in a text file and return as a list
@@ -106,3 +107,41 @@ def download_model_if_doesnt_exist(model_name):
             f.extractall(model_path)
 
         print("   Model unzipped to {}".format(model_path))
+
+
+
+def homorphicFiltering(img):
+    img = np.float32(img)
+    img = img/255
+
+    rows,cols,dim=img.shape
+
+    rh, rl, cutoff = 2.5,0.5,32
+
+    imgYCrCb = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
+    y,cr,cb = cv2.split(imgYCrCb)
+
+    y_log = np.log(y+0.01)
+
+    y_fft = np.fft.fft2(y_log)
+
+    y_fft_shift = np.fft.fftshift(y_fft)
+
+
+    DX = cols/cutoff
+    G = np.ones((rows,cols))
+    for i in range(rows):
+        for j in range(cols):
+            G[i][j]=((rh-rl)*(1-np.exp(-((i-rows/2)**2+(j-cols/2)**2)/(2*DX**2))))+rl
+
+    result_filter = G * y_fft_shift
+
+    result_interm = np.real(np.fft.ifft2(np.fft.ifftshift(result_filter)))
+
+    result = np.exp(result_interm)
+    result = result.astype(np.float32)
+    rgb = np.dstack((result,cr,cb)) 
+    rgb = cv2.cvtColor(rgb, cv2.COLOR_YCrCb2BGR)
+    rgb*=255
+    rgb  = rgb.astype(np.uint8)
+    return rgb

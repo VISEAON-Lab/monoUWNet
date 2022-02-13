@@ -12,7 +12,7 @@ import numpy as np
 import PIL.Image as pil
 import cv2
 from my_utils import *
-
+from utils import homorphicFiltering
 from .mono_dataset import MonoDataset
 
 class UCanyonDataset(MonoDataset):
@@ -64,15 +64,16 @@ class UCanyonDataset(MonoDataset):
         K = self.K[:3, :3].copy()
         K[0,:]*=self.full_res_shape[0]
         K[1,:]*=self.full_res_shape[1]
-        undistorted_img = cv2.undistort(np.array(color), self.cameraMatrix, self.distCoeffs, self.newCameraMatrix)
-        roi = self.roi
-        # undistorted_img = undistorted_img[roi[1]:roi[3], roi[0]:roi[2]]
-        self.full_res_shape = (undistorted_img.shape[1], undistorted_img.shape[0])
-        undistorted_img=pil.fromarray(undistorted_img)
+        # undistorted_img = cv2.undistort(np.array(color), self.cameraMatrix, self.distCoeffs, self.newCameraMatrix)
+        # roi = self.roi
+        # # undistorted_img = undistorted_img[roi[1]:roi[3], roi[0]:roi[2]]
+        # self.full_res_shape = (undistorted_img.shape[1], undistorted_img.shape[0])
+        # undistorted_img=pil.fromarray(undistorted_img)
         if do_flip:
             color = color.transpose(pil.FLIP_LEFT_RIGHT)
 
-        return undistorted_img
+        hf_color = homorphicFiltering(color)
+        return hf_color
 
     def get_image_path(self, folder, frame_index, side):
         idx, frameName = folder.split(',')

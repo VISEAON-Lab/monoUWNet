@@ -14,6 +14,7 @@ import cv2
 from my_utils import *
 import glob
 from .mono_dataset import MonoDataset
+from utils import homorphicFiltering
 
 class SCDataset(MonoDataset):
     """Superclass for different types of south carolina dataset loaders
@@ -51,7 +52,10 @@ class SCDataset(MonoDataset):
         if do_flip:
             color = color.transpose(pil.FLIP_LEFT_RIGHT)
 
-        return color
+        hf_color = homorphicFiltering(color)
+        return hf_color
+
+        # return color
 
     def get_image_path(self, folder, frame_index, side):
         idx, frameName = folder.split(',')
