@@ -58,10 +58,10 @@ class SCDataset(MonoDataset):
         color_hf_path = color_path.replace("imgs", "imgs_hf")
         if not os.path.isfile(color_hf_path):
             G = None
-            # if os.path.isfile(os.path.join(self.data_path, "G.npy")):
-            #     G = np.load(os.path.join(self.data_path, "G.npy"))
+            if os.path.isfile(os.path.join(self.data_path, "G.npy")):
+                G = np.load(os.path.join(self.data_path, "G.npy"))
             hf_color = pil.fromarray(homorphicFiltering(color, G))
-            hf_color.save(color_hf_path)
+            # hf_color.save(color_hf_path)
         else:
             hf_color = self.loader(color_hf_path)
         return hf_color

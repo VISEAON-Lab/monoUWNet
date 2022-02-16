@@ -116,7 +116,7 @@ def homorphicFiltering(img, G=None):
 
     rows,cols,dim=img.shape
 
-    rh, rl, cutoff = 0.9,0.5,32
+    rh, rl, cutoff = 0.6,0.5,32
 
     imgYCrCb = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
     y,cr,cb = cv2.split(imgYCrCb)
