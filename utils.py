@@ -110,15 +110,15 @@ def download_model_if_doesnt_exist(model_name):
 
 
 
-def homorphicFiltering(img):
+def homorphicFiltering(img, G=None):
     img = np.float32(img)
     img = img/255
 
     rows,cols,dim=img.shape
 
-    rh, rl, cutoff = 2.5,0.5,32
+    rh, rl, cutoff = 0.9,0.5,32
 
-    imgYCrCb = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
+    imgYCrCb = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
     y,cr,cb = cv2.split(imgYCrCb)
 
     y_log = np.log(y+0.01)
@@ -129,10 +129,11 @@ def homorphicFiltering(img):
 
 
     DX = cols/cutoff
-    G = np.ones((rows,cols))
-    for i in range(rows):
-        for j in range(cols):
-            G[i][j]=((rh-rl)*(1-np.exp(-((i-rows/2)**2+(j-cols/2)**2)/(2*DX**2))))+rl
+    if G is None:
+        G = np.ones((rows,cols))
+        for i in range(rows):
+            for j in range(cols):
+                G[i][j]=((rh-rl)*(1-np.exp(-((i-rows/2)**2+(j-cols/2)**2)/(2*DX**2))))+rl
 
     result_filter = G * y_fft_shift
 
@@ -141,7 +142,7 @@ def homorphicFiltering(img):
     result = np.exp(result_interm)
     result = result.astype(np.float32)
     rgb = np.dstack((result,cr,cb)) 
-    rgb = cv2.cvtColor(rgb, cv2.COLOR_YCrCb2BGR)
+    rgb = cv2.cvtColor(rgb, cv2.COLOR_YCrCb2RGB)
     rgb*=255
     rgb  = rgb.astype(np.uint8)
     return rgb
