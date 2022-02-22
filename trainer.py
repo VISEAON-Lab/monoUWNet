@@ -63,7 +63,9 @@ class Trainer:
         self.models["depth"] = networks.HRDepthDecoder(
             self.models["encoder"].num_ch_enc, self.opt.scales)
         
-        
+        self.models["bg2r"] = networks.BG2RCoeffsNetwork(64, 3)
+        self.models["bg2r"].to(self.device)
+
         self.models["encoder"].to(self.device)
         self.parameters_to_train += list(self.models["encoder"].parameters())
         self.models["depth"].to(self.device)
@@ -241,8 +243,8 @@ class Trainer:
             if early_phase or late_phase:
                 self.log_time(batch_idx, duration, losses["loss"].cpu().data)
 
-                if "depth_gt" in inputs:
-                    self.compute_depth_losses(inputs, outputs, losses)
+                # if "depth_gt" in inputs:
+                #     self.compute_depth_losses(inputs, outputs, losses)
 
                 self.log("train", inputs, outputs, losses)
                 self.val()
@@ -273,8 +275,11 @@ class Trainer:
         else:
             # Otherwise, we only feed the image with frame_id 0 through the depth encoder
             features = self.models["encoder"](inputs["color_aug", 0, 0])
-            
+
             outputs = self.models["depth"](features)
+
+            # bg2rInFeatures = features[1][0]
+            # mu_vec = self.models["bg2r"](bg2rInFeatures, inputs["color_aug", 0, 0])
 
         if self.opt.predictive_mask:
             outputs["predictive_mask"] = self.models["predictive_mask"](features)
@@ -450,11 +455,15 @@ class Trainer:
                     outputs[("color_identity", frame_id, scale)] = \
                         inputs[("color", frame_id, source_scale)]
 
-    def compute_reprojection_loss(self, pred, target):
+    def compute_reprojection_loss(self, pred, target, mask=None):
         """Computes reprojection loss between a batch of predicted and target images
         """
+        # mask3 = mask.expand(mask.shape[0], 3, mask.shape[2], mask.shape[3])
         abs_diff = torch.abs(target - pred)
         l1_loss = abs_diff.mean(1, True)
+
+        l1_loss[mask<1e-3]=0
+        l1_loss[mask>15]=0
 
         if self.opt.no_ssim:
             reprojection_loss = l1_loss
@@ -484,9 +493,15 @@ class Trainer:
             color = inputs[("color", 0, scale)]
             target = inputs[("color", 0, source_scale)]
 
+            ## add resize for depth 
+            s = 2 ** scale
+            depth = torch.nn.functional.interpolate(inputs[("depth_gt")], (self.opt.height // s, self.opt.width // s),
+                                               mode="nearest")
+            # 
+                    
             for frame_id in self.opt.frame_ids[1:]:
                 pred = outputs[("color", frame_id, scale)]
-                reprojection_losses.append(self.compute_reprojection_loss(pred, target))
+                reprojection_losses.append(self.compute_reprojection_loss(pred, target, depth))
             reprojection_losses = torch.cat(reprojection_losses, 1)
             if not self.opt.disable_automasking:
                 #doing this 
@@ -494,7 +509,7 @@ class Trainer:
                 for frame_id in self.opt.frame_ids[1:]:
                     pred = inputs[("color", frame_id, source_scale)]
                     identity_reprojection_losses.append(
-                        self.compute_reprojection_loss(pred, target))
+                        self.compute_reprojection_loss(pred, target, depth))
 
                 identity_reprojection_losses = torch.cat(identity_reprojection_losses, 1)
                 if self.opt.avg_reprojection:
@@ -560,6 +575,18 @@ class Trainer:
         corrLoss = corr_loss(inputs[("color", 0, 0)], inputs[("color", 0, 0)], outputs[('depth', 0, 0)])
         total_loss += (1e-5*corrLoss)
 
+        ## debug A
+        if 0:
+            img = toNumpy(inputs[("color", 0, 0)])
+            depth = toNumpy(outputs[('depth', 0, 0)])
+            A = estimateA(img, depth)
+            TM = np.zeros_like(img)
+            for t in range(3):
+                # TM[:,:,t] =  np.exp(-beta_rgb[t]*depth)
+                TM[:,:,t] =  water_types_Nrer_rgb["3C"][t]**depth
+            S = A*(1-TM)
+            J = (img - A) / TM + A
+            
         losses["loss"] = total_loss 
         return losses
 

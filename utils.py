@@ -109,6 +109,24 @@ def download_model_if_doesnt_exist(model_name):
         print("   Model unzipped to {}".format(model_path))
 
 
+water_types_Nrer_rgb = {}
+water_types_Nrer_rgb["I"] = np.exp(-np.array([0.233, 0.049, 0.021]))
+water_types_Nrer_rgb["IA"] = np.exp(-np.array([0.234,  0.0503, 0.0253]))
+water_types_Nrer_rgb["3C"] = np.exp(-np.array([0.380,  0.187, 0.240]))
+
+def estimateA(img, depth):
+    # finding BL
+    p = np.percentile(depth, 99.9)
+    depth_10p = depth.copy()
+    depth_10p[depth_10p<p]=0
+
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img_BL = gray.copy()
+    img_BL[depth_10p<p]=0
+    rmax, cmax = np.unravel_index(img_BL.argmax(), img_BL.shape)
+    BL = img[rmax, cmax, :]
+    return BL
+
 
 def homorphicFiltering(img, G=None):
     img = np.float32(img)

@@ -62,3 +62,35 @@ class HRDepthDecoder(nn.Module):
         outputs[("disp",3)] = self.sigmoid(self.convs["dispConvScale3"](x36))
         return outputs
         
+
+
+class BG2RCoeffsNetwork(nn.Module):
+    def __init__(self, in_channel, out_channel):
+        super(BG2RCoeffsNetwork, self).__init__()
+        
+        self.ca = ChannelAttention(in_channel)
+        self.sa = SpatialAttention()
+        self.cs = CS_Block(in_channel)
+        self.conv_se = nn.Conv2d(in_channels = in_channel, out_channels = out_channel, kernel_size = 3, stride = 1, padding = 1 )
+        self.relu = nn.ReLU(inplace = True)
+
+    def forward(self, input_features, image):
+        features = [upsample(input_features)]
+    
+        features = torch.cat(features, 1)
+
+        features = self.ca(features)
+        features = self.sa(features)
+        features = self.cs(features)
+        
+        mu_vec = self.relu(self.conv_se(features))
+        mu_vec = upsample(mu_vec)
+        R = torch.unsqueeze(image[:,0,:,:], dim=1)
+        BG = torch.max(image[:,1:, :,:], dim=1, keepdim=True)[0]
+        ones = torch.ones_like(R)
+        # BG_R = torch.max(image[:,1:, :,:], dim=1, keepdim=True)[0] - torch.unsqueeze(image[:,0,:,:], dim=1)
+        BG_R = torch.squeeze(torch.stack((ones, BG, R), dim=1), dim=2)
+        depth = torch.sum(mu_vec*BG_R, dim=1, keepdim=True)
+        return depth
+        
+        
