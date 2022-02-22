@@ -501,7 +501,7 @@ class Trainer:
                     
             for frame_id in self.opt.frame_ids[1:]:
                 pred = outputs[("color", frame_id, scale)]
-                reprojection_losses.append(self.compute_reprojection_loss(pred, target, inputs[("depth_gt")]))
+                reprojection_losses.append(self.compute_reprojection_loss(pred, target, depth))
             reprojection_losses = torch.cat(reprojection_losses, 1)
             if not self.opt.disable_automasking:
                 #doing this 
