@@ -494,14 +494,14 @@ class Trainer:
             target = inputs[("color", 0, source_scale)]
 
             ## add resize for depth 
-            s = 2 ** scale
-            depth = torch.nn.functional.interpolate(inputs[("depth_gt")], (self.opt.height // s, self.opt.width // s),
-                                               mode="nearest")
+            # s = 2 ** scale
+            # depth = torch.nn.functional.interpolate(inputs[("depth_gt")], (self.opt.height // s, self.opt.width // s),
+              #                                 mode="nearest")
             # 
                     
             for frame_id in self.opt.frame_ids[1:]:
                 pred = outputs[("color", frame_id, scale)]
-                reprojection_losses.append(self.compute_reprojection_loss(pred, target, depth))
+                reprojection_losses.append(self.compute_reprojection_loss(pred, target, inputs[("depth_gt")]))
             reprojection_losses = torch.cat(reprojection_losses, 1)
             if not self.opt.disable_automasking:
                 #doing this 
@@ -586,7 +586,7 @@ class Trainer:
                 TM[:,:,t] =  water_types_Nrer_rgb["3C"][t]**depth
             S = A*(1-TM)
             J = (img - A) / TM + A
-            
+
         losses["loss"] = total_loss 
         return losses
 
