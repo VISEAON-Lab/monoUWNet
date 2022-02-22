@@ -494,9 +494,9 @@ class Trainer:
             target = inputs[("color", 0, source_scale)]
 
             ## add resize for depth 
-            # s = 2 ** scale
-            # depth = torch.nn.functional.interpolate(inputs[("depth_gt")], (self.opt.height // s, self.opt.width // s),
-              #                                 mode="nearest")
+            s = 2 ** 0
+            depth = torch.nn.functional.interpolate(inputs[("depth_gt")], (self.opt.height // s, self.opt.width // s),
+                                              mode="nearest")
             # 
                     
             for frame_id in self.opt.frame_ids[1:]:
