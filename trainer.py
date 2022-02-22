@@ -20,7 +20,8 @@ import datasets
 import networks
 from IPython import embed
 
-full_res_shape = (608, 968)
+# full_res_shape = (608, 968)
+full_res_shape = (1200, 1600)
 
 corr_loss = CorrelationLoss()
 
