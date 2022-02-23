@@ -16,7 +16,7 @@ import networks
 # import hr_networks
 from layers import disp_to_depth
 from utils import download_model_if_doesnt_exist
-
+from my_utils import *
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -112,7 +112,7 @@ def test_simple(args):
         for idx, image_path in enumerate(paths):
             # if idx is not idx2run:
             #     continue
-            if image_path.endswith("_disp.jpg"):
+            if image_path.endswith("_disp.jpg") or image_path.endswith("_disp.bmp"):
                 # don't try to predict disparity for a disparity image!
                 continue
 

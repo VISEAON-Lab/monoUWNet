@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import DataLoader
 from  torchvision.utils import save_image
 from layers import disp_to_depth
-from utils import readlines, sec_to_hm_str
+from utils import readlines, sec_to_hm_str, estimateA, water_types_Nrer_rgb
 from options import MonodepthOptions
 import datasets
 import networks
@@ -207,6 +207,7 @@ def evaluate(opt):
         gt_height, gt_width = gt_depth.shape[:2]
 
         pred_disp = pred_disps[i]
+        depth4J = 5 / (pred_disp+1e-3)
         pred_disp = cv2.resize(pred_disp, (gt_width, gt_height))
         pred_depth = 1 / pred_disp
  
@@ -241,6 +242,20 @@ def evaluate(opt):
         plt.imsave(save_dir + "/frame_{:06d}_color.bmp".format(i), inputColor)
         plt.imsave(save_dir + "/frame_{:06d}_disp.bmp".format(i), outPred)
         plt.imsave(save_dir + "/frame_{:06d}_gt.bmp".format(i), inGT)
+
+                ## debug A
+        if 0:
+            img = inputColor
+            A = estimateA(img, depth4J)
+            TM = np.zeros_like(img)
+            for t in range(3):
+                # TM[:,:,t] =  np.exp(-beta_rgb[t]*depth)
+                TM[:,:,t] =  water_types_Nrer_rgb["3C"][t]**depth4J
+            S = A*(1-TM)
+            J = normalize_numpy((img - A) / TM + A)
+            Sn = (normalize_numpy(S)*255).astype(np.uint8)
+            plt.imsave(save_dir + "/frame_{:06d}_J.bmp".format(i), J)
+            plt.imsave(save_dir + "/frame_{:06d}_S.bmp".format(i), Sn)
 
 
     if not opt.disable_median_scaling:

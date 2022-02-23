@@ -469,8 +469,9 @@ class Trainer:
             ssim_loss = self.ssim(pred, target).mean(1, True)
             reprojection_loss = 0.85 * ssim_loss + 0.15 * l1_loss
 
-        reprojection_loss[mask<1e-3]=0
-        reprojection_loss[mask>15]=0
+        if mask is not None:
+            reprojection_loss[mask<1e-3]=0
+            reprojection_loss[mask>15]=0
 
         return reprojection_loss
 
@@ -495,9 +496,11 @@ class Trainer:
             target = inputs[("color", 0, source_scale)]
 
             ## add resize for depth 
-            s = 2 ** 0
-            depth = torch.nn.functional.interpolate(inputs[("depth_gt")], (self.opt.height // s, self.opt.width // s),
-                                              mode="nearest")
+            depth=None
+            if "depth_gt" in inputs:
+                s = 2 ** 0
+                depth = torch.nn.functional.interpolate(inputs[("depth_gt")], (self.opt.height // s, self.opt.width // s),
+                                                mode="nearest")
             # 
                     
             for frame_id in self.opt.frame_ids[1:]:
