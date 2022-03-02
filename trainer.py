@@ -420,7 +420,7 @@ class Trainer:
             _, depth = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)#disp_to_depth function is in layers.py
 
             outputs[("depth", 0, scale)] = depth
-
+            # outputs[("depth", 0, scale)] = 0.1*inputs[("depth_gt")].clone()
             for i, frame_id in enumerate(self.opt.frame_ids[1:]):
 
                 if frame_id == "s":
@@ -469,9 +469,9 @@ class Trainer:
             ssim_loss = self.ssim(pred, target).mean(1, True)
             reprojection_loss = 0.85 * ssim_loss + 0.15 * l1_loss
 
-        if mask is not None:
-            reprojection_loss[mask<1e-3]=0
-            reprojection_loss[mask>15]=0
+        # if mask is not None:
+        #     reprojection_loss[mask<1e-3]=0
+        #     reprojection_loss[mask>15]=0
 
         return reprojection_loss
 
