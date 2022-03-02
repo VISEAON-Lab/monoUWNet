@@ -166,7 +166,7 @@ class MonoDataset(data.Dataset):
                 inputs[("color", i, -1)] = self.get_color(folder, frame_index + i, side, do_flip)
                 # change color sapce
 
-        if 1: # sc/uc/flatiron
+        if 0: # sc/uc/flatiron
             frameNum=int(line[0].split(',')[0])
             inputs["frameNum"]=frameNum
 
