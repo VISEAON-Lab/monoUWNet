@@ -5,6 +5,7 @@ import zipfile
 from six.moves import urllib
 import numpy as np
 import cv2
+from my_utils import toNumpy
 
 def readlines(filename):
     """Read all the lines in a text file and return as a list
@@ -120,13 +121,27 @@ def estimateA(img, depth):
     depth_10p = depth.copy()
     depth_10p[depth_10p<p]=0
 
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     img_BL = gray.copy()
     img_BL[depth_10p<p]=0
     rmax, cmax = np.unravel_index(img_BL.argmax(), img_BL.shape)
     BL = img[rmax, cmax, :]
     return BL
 
+
+
+
+def computeJ(image, depth):
+    img = toNumpy(image)
+    depth = toNumpy(depth)
+    A = estimateA(img, depth)
+    TM = np.zeros_like(img)
+    for t in range(3):
+        # TM[:,:,t] =  np.exp(-beta_rgb[t]*depth)
+        TM[:,:,t] =  water_types_Nrer_rgb["3C"][t]**depth
+    S = A*(1-TM)
+    J = (img - A) / TM + A
+    return J # TODO: convert back to pytorch
 
 def homorphicFiltering(img, G=None):
     img = np.float32(img)

@@ -166,10 +166,11 @@ class MonoDataset(data.Dataset):
                 inputs[("color", i, -1)] = self.get_color(folder, frame_index + i, side, do_flip)
                 # change color sapce
 
-        if 0: # sc/uc/flatiron
+        if self.dataName != 'kitti': # sc/uc/flatiron
             frameNum=int(line[0].split(',')[0])
             inputs["frameNum"]=frameNum
-
+        else:
+            inputs["frameNum"] = frame_index
         # adjusting intrinsics to match each scale in the pyramid
         for scale in range(self.num_scales):
             K = self.K.copy()

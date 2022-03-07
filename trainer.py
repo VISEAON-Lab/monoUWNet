@@ -591,6 +591,16 @@ class Trainer:
             S = A*(1-TM)
             J = (img - A) / TM + A
 
+        frameNum = inputs["frameNum"].numpy()[0]
+
+        if 0:
+            saveTensor(inputs[('color', -1, 0)], 'kitti_lossDebug/kitti'+str(frameNum)+'_minusonecolor.png')
+            saveTensor(inputs[('color', 1, 0)], 'kitti_lossDebug/kitti'+str(frameNum)+'_plusonecolor.png')
+            saveTensor(inputs[('color', 0, 0)], 'kitti_lossDebug/kitti'+str(frameNum)+'_color.png')
+            saveTensor(outputs[('color', 1, 0)], 'kitti_lossDebug/kitti'+str(frameNum)+'_plusonecolorpred.png')
+            saveTensor(outputs[('color', -1, 0)], 'kitti_lossDebug/kitti'+str(frameNum)+'_minusonecolorpred.png')
+            saveTensor((inputs[('color', 0, 0)] - outputs[('color', -1, 0)]), 'kitti_lossDebug/kitti'+str(frameNum)+'_diffminus.png')
+            saveTensor((inputs[('color', 0, 0)] - outputs[('color', 1, 0)]), 'kitti_lossDebug/kitti'+str(frameNum)+'_diffplus.png')
         losses["loss"] = total_loss 
         return losses
 

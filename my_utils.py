@@ -82,7 +82,6 @@ def toNumpy(tensorIm, keepDim=False):
         im = im.transpose((0, 2, 3, 1))
     return im
 
-
 def saveTensorAsNPY(image, filename="tempIm"):
     im = np.squeeze(image.cpu().detach().numpy())
     if im.ndim == 3:
@@ -95,7 +94,7 @@ def saveTensor(image, filename="tempIm.png"):
         im = im.transpose((1, 2, 0))
     im = normalize_numpy(im)
     plt.imsave(filename,im)
-    
+
 def plotTensor(image, crop=False):
     im = np.squeeze(image.cpu().detach().numpy())
     if im.ndim == 3:
