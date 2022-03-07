@@ -107,7 +107,7 @@ def evaluate(opt):
     # decoder_dict = torch.load(decoder_path) if torch.cuda.is_available() else torch.load(encoder_path,map_location = 'cpu')
     decoder_dict = torch.load(decoder_path, map_location=torch.device(device)) 
     if  opt.dataset=='kitti':
-        dataset = datasets.KITTIRAWDataset(opt.data_path, filenames,
+        dataset = datasets.KITTIRAWDataset(opt.dataset, opt.data_path, filenames,
                                            encoder_dict['height'], encoder_dict['width'],
                                            [0], 4, is_train=False)
     elif opt.dataset=='sc': # aqualoc
