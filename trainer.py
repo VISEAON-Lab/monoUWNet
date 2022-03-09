@@ -594,11 +594,10 @@ class Trainer:
                 TM[:,:,t] =  water_types_Nrer_rgb["3C"][t]**depth
             S = A*(1-TM)
             J = (img - A) / TM + A
-
-        frameNum = inputs["frameNum"].numpy()[0]
-
-        dataname='uc'
+    
         if 0:
+            dataname='uc'
+            frameNum = inputs["frameNum"].numpy()[0]
             saveTensor(inputs[('color', -1, 0)], dataname + '_lossDebug/' + dataname + str(frameNum)+'_minusonecolor.png')
             saveTensor(inputs[('color', 1, 0)], dataname+'_lossDebug/'+ dataname +str(frameNum)+'_plusonecolor.png')
             saveTensor(inputs[('color', 0, 0)], dataname + '_lossDebug/'+ dataname +str(frameNum)+'_color.png')
