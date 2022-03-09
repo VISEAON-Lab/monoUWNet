@@ -246,7 +246,10 @@ class SSIM(nn.Module):
 
         return torch.clamp((1 - SSIM_n / SSIM_d) / 2, 0, 1)
 
-
+def compute_bg_r_loss(bg_r, depth):
+    abs_rel = torch.mean(torch.abs(bg_r - depth) / bg_r)
+    return abs_rel
+    
 def compute_depth_errors(gt, pred):
     """Computation of error metrics between predicted and ground truth depths
     """

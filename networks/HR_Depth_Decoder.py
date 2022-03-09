@@ -63,6 +63,28 @@ class HRDepthDecoder(nn.Module):
         return outputs
         
 
+## BGR_Attetion
+class BG_R_Attention(nn.Module):
+    def __init__(self, in_planes, ratio=16):
+        super(BG_R_Attention, self).__init__()
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+           
+        self.fc = nn.Sequential(
+            nn.Linear(in_planes,in_planes // ratio, bias = False),
+            nn.Linear(in_planes // ratio, 1, bias = False)
+        )
+        self.sigmoid = nn.Sigmoid()
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+
+    def forward(self, in_feature):
+        x = in_feature
+        b, c, _, _ = in_feature.size()
+        avg_out = self.fc(x.view(b, 3,-1))
+        out = 2*self.sigmoid(avg_out)-1
+        return out
+
 
 class BG2RCoeffsNetwork(nn.Module):
     def __init__(self, in_channel, out_channel):
@@ -72,7 +94,11 @@ class BG2RCoeffsNetwork(nn.Module):
         self.sa = SpatialAttention()
         self.cs = CS_Block(in_channel)
         self.conv_se = nn.Conv2d(in_channels = in_channel, out_channels = out_channel, kernel_size = 3, stride = 1, padding = 1 )
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.Linear(240*320, 3)
         self.relu = nn.ReLU(inplace = True)
+        self.sigmoid = nn.Sigmoid()
+        self.bgrAtt = BG_R_Attention(76800, 16)
 
     def forward(self, input_features, image):
         features = [upsample(input_features)]
@@ -83,14 +109,16 @@ class BG2RCoeffsNetwork(nn.Module):
         features = self.sa(features)
         features = self.cs(features)
         
-        mu_vec = self.relu(self.conv_se(features))
-        mu_vec = upsample(mu_vec)
+        mu_vec = self.conv_se(features)
+        mu_vec = self.bgrAtt(mu_vec)
+        mu_vec = torch.unsqueeze(mu_vec, dim=3)
         R = torch.unsqueeze(image[:,0,:,:], dim=1)
         BG = torch.max(image[:,1:, :,:], dim=1, keepdim=True)[0]
         ones = torch.ones_like(R)
         # BG_R = torch.max(image[:,1:, :,:], dim=1, keepdim=True)[0] - torch.unsqueeze(image[:,0,:,:], dim=1)
         BG_R = torch.squeeze(torch.stack((ones, BG, R), dim=1), dim=2)
-        depth = torch.sum(mu_vec*BG_R, dim=1, keepdim=True)
+        depth = torch.abs(torch.sum(mu_vec*BG_R, dim=1, keepdim=True))
+        # TODO: consider changing to max(x,0) and ignore 0 pixels in loss.
         return depth
         
         

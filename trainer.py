@@ -279,9 +279,9 @@ class Trainer:
 
             outputs = self.models["depth"](features)
 
-            # bg2rInFeatures = features[1][0]
-            # mu_vec = self.models["bg2r"](bg2rInFeatures, inputs["color_aug", 0, 0])
-
+            bg2rInFeatures = features[1][0]
+            BG_R = self.models["bg2r"](bg2rInFeatures, inputs["color_aug", 0, 0])
+            outputs["BG_R"] = BG_R
         if self.opt.predictive_mask:
             outputs["predictive_mask"] = self.models["predictive_mask"](features)
             #different form 1:*:* depth maps ,it will output 2:*:* mask maps
@@ -576,8 +576,12 @@ class Trainer:
         total_loss /= self.num_scales
 
         # correlation loss
-        corrLoss = corr_loss(inputs[("color", 0, 0)], inputs[("color", 0, 0)], outputs[('depth', 0, 0)])
-        total_loss += (1e-5*corrLoss)
+        # corrLoss = corr_loss(inputs[("color", 0, 0)], inputs[("color", 0, 0)], outputs[('depth', 0, 0)])
+        # total_loss += (1e-5*corrLoss)
+
+        # BG_R loss
+        bgrLoss = compute_bg_r_loss(outputs[('BG_R')], outputs[('depth', 0, 0)])
+        total_loss += (1e-5*bgrLoss)
 
         ## debug A
         if 0:
@@ -593,14 +597,16 @@ class Trainer:
 
         frameNum = inputs["frameNum"].numpy()[0]
 
+        dataname='uc'
         if 0:
-            saveTensor(inputs[('color', -1, 0)], 'kitti_lossDebug/kitti'+str(frameNum)+'_minusonecolor.png')
-            saveTensor(inputs[('color', 1, 0)], 'kitti_lossDebug/kitti'+str(frameNum)+'_plusonecolor.png')
-            saveTensor(inputs[('color', 0, 0)], 'kitti_lossDebug/kitti'+str(frameNum)+'_color.png')
-            saveTensor(outputs[('color', 1, 0)], 'kitti_lossDebug/kitti'+str(frameNum)+'_plusonecolorpred.png')
-            saveTensor(outputs[('color', -1, 0)], 'kitti_lossDebug/kitti'+str(frameNum)+'_minusonecolorpred.png')
-            saveTensor((inputs[('color', 0, 0)] - outputs[('color', -1, 0)]), 'kitti_lossDebug/kitti'+str(frameNum)+'_diffminus.png')
-            saveTensor((inputs[('color', 0, 0)] - outputs[('color', 1, 0)]), 'kitti_lossDebug/kitti'+str(frameNum)+'_diffplus.png')
+            saveTensor(inputs[('color', -1, 0)], dataname + '_lossDebug/' + dataname + str(frameNum)+'_minusonecolor.png')
+            saveTensor(inputs[('color', 1, 0)], dataname+'_lossDebug/'+ dataname +str(frameNum)+'_plusonecolor.png')
+            saveTensor(inputs[('color', 0, 0)], dataname + '_lossDebug/'+ dataname +str(frameNum)+'_color.png')
+            saveTensor(outputs[('color', 1, 0)], dataname+ '_lossDebug/'+ dataname +str(frameNum)+'_plusonecolorpred.png')
+            saveTensor(outputs[('color', -1, 0)], dataname+'_lossDebug/'+ dataname +str(frameNum)+'_minusonecolorpred.png')
+            saveTensor((inputs[('color', 0, 0)] - outputs[('color', -1, 0)]), dataname+'_lossDebug/'+ dataname +str(frameNum)+'_diffminus.png')
+            saveTensor((inputs[('color', 0, 0)] - outputs[('color', 1, 0)]), dataname+'_lossDebug/'+ dataname +str(frameNum)+'_diffplus.png')
+            saveTensor((outputs[('depth', 0, 0)] - outputs[('color', 1, 0)]), dataname+'_lossDebug/'+ dataname +str(frameNum)+'_depth.png')
         losses["loss"] = total_loss 
         return losses
 
