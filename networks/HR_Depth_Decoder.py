@@ -86,9 +86,9 @@ class BG_R_Attention(nn.Module):
         return out
 
 
-class WaterTypeClassification(nn.Module):
-    def __init__(self, in_channel, numClasses):
-        super(WaterTypeClassification, self).__init__()
+class WaterTypeRegression(nn.Module):
+    def __init__(self, in_channel):
+        super(WaterTypeRegression, self).__init__()
         
         self.model = nn.Sequential(
             nn.Conv2d(3, 7, 2, padding = 1),
@@ -100,7 +100,7 @@ class WaterTypeClassification(nn.Module):
             nn.ReLU(),            
             nn.Linear(32, 16),
             nn.ReLU(),
-            nn.Linear(16, numClasses)
+            nn.Linear(16, 3)
             )        
     def forward(self, x):
         """ A forward pass of your neural net (evaluates f(x)).
