@@ -246,6 +246,33 @@ class SSIM(nn.Module):
 
         return torch.clamp((1 - SSIM_n / SSIM_d) / 2, 0, 1)
 
+
+class LocalVariation(nn.Module):
+    """Layer to compute the LocalVariation  of an image
+    """
+    def __init__(self, k_size=5):
+        super(LocalVariation, self).__init__()
+        self.mu_x_pool   = nn.AvgPool2d(k_size, 1)
+        self.mu_y_pool   = nn.AvgPool2d(k_size, 1)
+        self.sig_x_pool  = nn.AvgPool2d(k_size, 1)
+        self.sig_y_pool  = nn.AvgPool2d(k_size, 1)
+        self.sig_xy_pool = nn.AvgPool2d(k_size, 1)
+
+        self.refl = nn.ReflectionPad2d(k_size//2)
+
+    def forward(self, x, y):
+        x = self.refl(x)
+        y = self.refl(y)
+
+        mu_x = self.mu_x_pool(x)
+        mu_y = self.mu_y_pool(y)
+        sigma_x  = self.sig_x_pool(x ** 2) - mu_x ** 2
+        sigma_y  = self.sig_y_pool(y ** 2) - mu_y ** 2
+        lv = sigma_x + sigma_y
+
+        return lv
+
+
 def compute_bg_r_loss(bg_r, depth):
     abs_rel = torch.mean(torch.abs(bg_r - depth) / bg_r)
     return abs_rel

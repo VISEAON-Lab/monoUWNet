@@ -86,6 +86,36 @@ class BG_R_Attention(nn.Module):
         return out
 
 
+class WaterTypeClassification(nn.Module):
+    def __init__(self, in_channel, numClasses):
+        super(WaterTypeClassification, self).__init__()
+        
+        self.model = nn.Sequential(
+            nn.Conv2d(3, 7, 2, padding = 1),
+            nn.MaxPool2d(2, stride = 2),
+            nn.Flatten(),
+            nn.Linear(1792, 256),
+            nn.ReLU(),
+            nn.Linear(256, 32),
+            nn.ReLU(),            
+            nn.Linear(32, 16),
+            nn.ReLU(),
+            nn.Linear(16, numClasses)
+            )        
+    def forward(self, x):
+        """ A forward pass of your neural net (evaluates f(x)).
+        @param x: an (N, in_size) torch tensor
+        @return y: an (N, out_size) torch tensor of output from the network
+        """
+        #Normalise in forward from fit()
+        mean = torch.mean(x)
+        std = torch.std(x)
+        x = (x - mean) / std
+
+        x = x.reshape(-1, 3, 32, 32)
+        return self.model(x)
+
+
 class BG2RCoeffsNetwork(nn.Module):
     def __init__(self, in_channel, out_channel):
         super(BG2RCoeffsNetwork, self).__init__()

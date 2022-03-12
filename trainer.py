@@ -235,6 +235,9 @@ class Trainer:
             losses["loss"].backward()
             self.model_optimizer.step()
 
+            # add 2nd NN
+            
+
             duration = time.time() - before_op_time
 
             # log less frequently after the first 2000 steps to save time & disk space
@@ -469,6 +472,12 @@ class Trainer:
             ssim_loss = self.ssim(pred, target).mean(1, True)
             reprojection_loss = 0.85 * ssim_loss + 0.15 * l1_loss
 
+        # mask = disp
+        weights_mask = normalize_image(mask)
+        reprojection_loss*=weights_mask
+        self.lv = LocalVariation(k_size=11)
+        lv = self.lv(pred, target)
+        reprojection_loss*=lv
         # if mask is not None:
         #     reprojection_loss[mask<1e-3]=0
         #     reprojection_loss[mask>15]=0
@@ -505,7 +514,7 @@ class Trainer:
                     
             for frame_id in self.opt.frame_ids[1:]:
                 pred = outputs[("color", frame_id, scale)]
-                reprojection_losses.append(self.compute_reprojection_loss(pred, target, depth))
+                reprojection_losses.append(self.compute_reprojection_loss(pred, target, disp))
             reprojection_losses = torch.cat(reprojection_losses, 1)
             if not self.opt.disable_automasking:
                 #doing this 
