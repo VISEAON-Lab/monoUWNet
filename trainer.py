@@ -509,7 +509,7 @@ class Trainer:
             disp = outputs[("disp", scale)]
             color = inputs[("color", 0, scale)]
             target = inputs[("color", 0, source_scale)]
-
+            disp_src = outputs[("disp", source_scale)]
             ## add resize for depth 
             depth=None
             if "depth_gt" in inputs:
@@ -520,15 +520,16 @@ class Trainer:
                     
             for frame_id in self.opt.frame_ids[1:]:
                 pred = outputs[("color", frame_id, scale)]
-                reprojection_losses.append(self.compute_reprojection_loss(pred, target, disp))
+                reprojection_losses.append(self.compute_reprojection_loss(pred, target, disp_src))
             reprojection_losses = torch.cat(reprojection_losses, 1)
             if not self.opt.disable_automasking:
                 #doing this 
                 identity_reprojection_losses = []
                 for frame_id in self.opt.frame_ids[1:]:
                     pred = inputs[("color", frame_id, source_scale)]
+                    
                     identity_reprojection_losses.append(
-                        self.compute_reprojection_loss(pred, target, disp))
+                        self.compute_reprojection_loss(pred, target, disp_src))
 
                 identity_reprojection_losses = torch.cat(identity_reprojection_losses, 1)
                 if self.opt.avg_reprojection:
