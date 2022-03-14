@@ -478,8 +478,9 @@ class Trainer:
             reprojection_loss = 0.85 * ssim_loss + 0.15 * l1_loss
 
         # mask = disp
-        weights_mask = normalize_image(mask)
-        reprojection_loss*=weights_mask
+        if mask is not None:
+            weights_mask = normalize_image(mask)
+            reprojection_loss*=weights_mask
         self.lv = LocalVariation(k_size=25)
         lv = normalize_image(self.lv(pred, target).mean(1, True))
         reprojection_loss*=lv
@@ -527,7 +528,7 @@ class Trainer:
                 for frame_id in self.opt.frame_ids[1:]:
                     pred = inputs[("color", frame_id, source_scale)]
                     identity_reprojection_losses.append(
-                        self.compute_reprojection_loss(pred, target, depth))
+                        self.compute_reprojection_loss(pred, target, disp))
 
                 identity_reprojection_losses = torch.cat(identity_reprojection_losses, 1)
                 if self.opt.avg_reprojection:
