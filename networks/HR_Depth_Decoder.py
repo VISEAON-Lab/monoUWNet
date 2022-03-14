@@ -91,7 +91,7 @@ class WaterTypeRegression(nn.Module):
         super(WaterTypeRegression, self).__init__()
         
         self.model = nn.Sequential(
-            nn.Conv2d(3, 7, 2, padding = 1),
+            nn.Conv2d(in_channel, 7, 2, padding = 1),
             nn.MaxPool2d(2, stride = 2),
             nn.Flatten(),
             nn.Linear(1792, 256),

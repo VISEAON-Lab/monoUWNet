@@ -67,6 +67,10 @@ class Trainer:
         self.models["bg2r"] = networks.BG2RCoeffsNetwork(64, 3)
         self.models["bg2r"].to(self.device)
 
+        # 2nd NN
+        self.models["recon"] = networks.WaterTypeRegression(3)
+        self.models["recon"].to(self.device)
+
         self.models["encoder"].to(self.device)
         self.parameters_to_train += list(self.models["encoder"].parameters())
         self.models["depth"].to(self.device)
@@ -236,6 +240,7 @@ class Trainer:
             self.model_optimizer.step()
 
             # add 2nd NN
+            # reconself.models["recon"](inputs[('color', 0, 0)],outputs[("depth", 0, 0)] )
             
 
             duration = time.time() - before_op_time
@@ -585,12 +590,12 @@ class Trainer:
         total_loss /= self.num_scales
 
         # correlation loss
-        # corrLoss = corr_loss(inputs[("color", 0, 0)], inputs[("color", 0, 0)], outputs[('depth', 0, 0)])
-        # total_loss += (1e-5*corrLoss)
+        corrLoss = corr_loss(inputs[("color", 0, 0)], inputs[("color", 0, 0)], outputs[('depth', 0, 0)])
+        total_loss += (1e-5*corrLoss)
 
         # BG_R loss
-        bgrLoss = compute_bg_r_loss(outputs[('BG_R')], outputs[('depth', 0, 0)])
-        total_loss += (1e-5*bgrLoss)
+        # bgrLoss = compute_bg_r_loss(outputs[('BG_R')], outputs[('depth', 0, 0)])
+        # total_loss += (1e-7*bgrLoss)
 
         ## debug A
         if 0:
