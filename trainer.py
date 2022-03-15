@@ -426,6 +426,10 @@ class Trainer:
                 source_scale = 0
 
             _, depth = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)#disp_to_depth function is in layers.py
+            
+            ## debug
+            # gt = inputs[('depth_gt')].resize(480, 640)
+            # depth[inputs[('depth_gt')]>0] = inputs[('depth_gt')]
 
             outputs[("depth", 0, scale)] = depth
             # outputs[("depth", 0, scale)] = 0.1*inputs[("depth_gt")].clone()
@@ -478,12 +482,12 @@ class Trainer:
             reprojection_loss = 0.85 * ssim_loss + 0.15 * l1_loss
 
         # mask = disp
-        if mask is not None:
-            weights_mask = normalize_image(mask)
-            reprojection_loss*=weights_mask
+        # if mask is not None:
+        #     weights_mask = normalize_image(mask)
+        #     reprojection_loss*=weights_mask
         self.lv = LocalVariation(k_size=25)
         lv = normalize_image(self.lv(pred, target).mean(1, True))
-        # reprojection_loss*=lv
+        reprojection_loss*=lv
         # if mask is not None:
         #     reprojection_loss[mask<1e-3]=0
         #     reprojection_loss[mask>15]=0
