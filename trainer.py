@@ -600,8 +600,8 @@ class Trainer:
         total_loss += (1e-5*corrLoss)
 
         # BG_R loss
-        # bgrLoss = compute_bg_r_loss(outputs[('BG_R')], outputs[('depth', 0, 0)])
-        # total_loss += (1e-7*bgrLoss)
+        bgrLoss = compute_bg_r_loss(outputs[('BG_R')], outputs[('depth', 0, 0)])
+        total_loss += (1e-7*bgrLoss)
 
         ## debug A
         if 0:
