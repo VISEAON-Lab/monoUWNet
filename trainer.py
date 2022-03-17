@@ -512,7 +512,7 @@ class Trainer:
     def computeGWLoss(self, img):
         globalMu = torch.mean(img.view(img.shape[0], -1), dim=1)
         channelMu = torch.mean(img.view(img.shape[0], img.shape[1],-1), dim=2)
-        gwloss = self.GWLoss(globalMu.view(2,1), channelMu)
+        gwloss = self.GWLoss(globalMu.view(img.shape[0],1), channelMu)
         # TODO: make sure rquires grad is on for the whole process
         return gwloss
 
