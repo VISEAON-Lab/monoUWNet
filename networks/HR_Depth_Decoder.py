@@ -6,7 +6,8 @@ import torch.nn as nn
 from collections import OrderedDict
 from hr_layers import *
 from layers import upsample
-from my_utils import plotTensorMultiple
+from my_utils import plotTensorMultiple, toNumpy, to_tensor
+from utils import estimateA
 
 class HRDepthDecoder(nn.Module):
     def __init__(self, num_ch_enc, scales=range(4), num_output_channels=1, mobile_encoder=False):
@@ -91,29 +92,55 @@ class WaterTypeRegression(nn.Module):
         super(WaterTypeRegression, self).__init__()
         
         self.model = nn.Sequential(
-            nn.Conv2d(in_channel, 7, 2, padding = 1),
+            nn.Conv2d(in_channel, 16, 3, padding = 1),
             nn.MaxPool2d(2, stride = 2),
+            nn.Conv2d(16, 8, 5, padding = 1),
             nn.Flatten(),
-            nn.Linear(1792, 256),
+            nn.Linear(605472, 256),
             nn.ReLU(),
             nn.Linear(256, 32),
             nn.ReLU(),            
             nn.Linear(32, 16),
             nn.ReLU(),
             nn.Linear(16, 3)
-            )        
-    def forward(self, x):
+            )       
+
+    def print_sizes(self, model, input_tensor):
+        output = input_tensor
+        for m in model.children():
+            output = m(output)
+            print(m, output.shape)
+        return output 
+
+    def forward(self, x, d):
         """ A forward pass of your neural net (evaluates f(x)).
         @param x: an (N, in_size) torch tensor
         @return y: an (N, out_size) torch tensor of output from the network
         """
+        input_tensor = x.clone()
+        # self.print_sizes(self.model, input_tensor)
         #Normalise in forward from fit()
         mean = torch.mean(x)
         std = torch.std(x)
         x = (x - mean) / std
 
-        x = x.reshape(-1, 3, 32, 32)
-        return self.model(x)
+        # x = x.reshape(-1, 3, 32, 32)
+        TM = torch.exp(-self.model(x).view(-1, 3, 1, 1)*d)
+        batch_size = x.shape[0]
+        A = torch.zeros(1,3)
+        for i in range(batch_size):
+            img = toNumpy(input_tensor[i,:,:,:])
+            depth = toNumpy(d[i,:,:])
+            Ai = torch.from_numpy(estimateA(img, depth))
+            A+=Ai
+        A/=batch_size
+        # A = torch.tensor((0.5020, 0.7941, 0.4000))
+
+        A = torch.repeat_interleave(A.view(1,3,1,1),batch_size, dim=0)
+
+        # print(A)
+        J = (x - A) / TM + A
+        return J
 
 
 class BG2RCoeffsNetwork(nn.Module):

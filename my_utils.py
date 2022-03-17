@@ -20,8 +20,8 @@ class ToTensor(object):
         Returns:
             Tensor: Converted image.
         """
-        if not (_is_numpy_image(img)):
-            raise TypeError('img should be ndarray. Got {}'.format(type(img)))
+        # if not (_is_numpy_image(img)):
+        #     raise TypeError('img should be ndarray. Got {}'.format(type(img)))
 
         if isinstance(img, np.ndarray):
             # handle numpy array

@@ -70,6 +70,8 @@ class Trainer:
         # 2nd NN
         self.models["recon"] = networks.WaterTypeRegression(3)
         self.models["recon"].to(self.device)
+        self.GWLoss = nn.L1Loss()
+        self.gwOptimizer = optim.SGD(self.models["recon"].parameters(), lr=1e-4)
 
         self.models["encoder"].to(self.device)
         self.parameters_to_train += list(self.models["encoder"].parameters())
@@ -238,13 +240,21 @@ class Trainer:
         for batch_idx, inputs in enumerate(self.train_loader):
             before_op_time = time.time()
             outputs, losses = self.process_batch(inputs)
+            # add 2nd NN
+            inputs[('color', 0, 0)].requires_grad=True
+            recon = self.models["recon"](inputs[('color', 0, 0)],outputs[("depth", 0, 0)] )
+            gwloss = self.computeGWLoss(recon)
+            losses["loss"]+=(1e-5)*gwloss
             self.model_optimizer.zero_grad()
             losses["loss"].backward()
             self.model_optimizer.step()
 
-            # add 2nd NN
-            # reconself.models["recon"](inputs[('color', 0, 0)],outputs[("depth", 0, 0)] )
-            
+      
+            # gwloss = self.computeGWLoss(recon)
+            # self.gwOptimizer.zero_grad()
+            # # torch.autograd.set_detect_anomaly(True)
+            # gwloss.backward()
+            # self.gwOptimizer.step()
 
             duration = time.time() - before_op_time
 
@@ -431,8 +441,10 @@ class Trainer:
             _, depth = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)#disp_to_depth function is in layers.py
             
             ## debug
-            # gt = inputs[('depth_gt')].resize(480, 640)
-            # depth[inputs[('depth_gt')]>0] = inputs[('depth_gt')]
+            # # TODO: remove taht after!!
+            # gt = inputs[('depth_gt')]
+            # gt = F.interpolate(gt, size=(480, 640))
+            # depth[gt>0] = gt[gt>0]
 
             outputs[("depth", 0, scale)] = depth
             # outputs[("depth", 0, scale)] = 0.1*inputs[("depth_gt")].clone()
@@ -496,6 +508,15 @@ class Trainer:
         #     reprojection_loss[mask>15]=0
 
         return reprojection_loss
+
+    def computeGWLoss(self, img):
+        globalMu = torch.mean(img.view(img.shape[0], -1), dim=1)
+        channelMu = torch.mean(img.view(img.shape[0], img.shape[1],-1), dim=2)
+        gwloss = self.GWLoss(globalMu.view(2,1), channelMu)
+        # TODO: make sure rquires grad is on for the whole process
+        return gwloss
+
+
 
     def compute_losses(self, inputs, outputs):
         """Compute the reprojection and smoothness losses for a minibatch
@@ -603,8 +624,8 @@ class Trainer:
         # total_loss += (1e-5*corrLoss)
 
         # BG_R loss
-        bgrLoss = compute_bg_r_loss(outputs[('BG_R')], outputs[('depth', 0, 0)])
-        total_loss += (1e-7*bgrLoss)
+        # bgrLoss = compute_bg_r_loss(outputs[('BG_R')], outputs[('depth', 0, 0)])
+        # total_loss += (1e-7*bgrLoss)
 
         ## debug A
         if 0:
@@ -619,7 +640,7 @@ class Trainer:
             J = (img - A) / TM + A
     
         if 0:
-            dataname='uc'
+            dataname='sc'
             frameNum = inputs["frameNum"].numpy()[0]
             saveTensor(inputs[('color', -1, 0)], dataname + '_lossDebug/' + dataname + str(frameNum)+'_minusonecolor.png')
             saveTensor(inputs[('color', 1, 0)], dataname+'_lossDebug/'+ dataname +str(frameNum)+'_plusonecolor.png')
@@ -628,7 +649,7 @@ class Trainer:
             saveTensor(outputs[('color', -1, 0)], dataname+'_lossDebug/'+ dataname +str(frameNum)+'_minusonecolorpred.png')
             saveTensor((inputs[('color', 0, 0)] - outputs[('color', -1, 0)]), dataname+'_lossDebug/'+ dataname +str(frameNum)+'_diffminus.png')
             saveTensor((inputs[('color', 0, 0)] - outputs[('color', 1, 0)]), dataname+'_lossDebug/'+ dataname +str(frameNum)+'_diffplus.png')
-            saveTensor((outputs[('depth', 0, 0)] - outputs[('color', 1, 0)]), dataname+'_lossDebug/'+ dataname +str(frameNum)+'_depth.png')
+            saveTensor((outputs[('depth', 0, 0)]), dataname+'_lossDebug/'+ dataname +str(frameNum)+'_depth.png')
         losses["loss"] = total_loss 
         return losses
 
