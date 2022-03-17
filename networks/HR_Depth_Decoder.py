@@ -147,8 +147,9 @@ class BG2RCoeffsNetwork(nn.Module):
         ones = torch.ones_like(R)
         # BG_R = torch.max(image[:,1:, :,:], dim=1, keepdim=True)[0] - torch.unsqueeze(image[:,0,:,:], dim=1)
         BG_R = torch.squeeze(torch.stack((ones, BG, R), dim=1), dim=2)
-        depth = torch.abs(torch.sum(mu_vec*BG_R, dim=1, keepdim=True))
-        # TODO: consider changing to max(x,0) and ignore 0 pixels in loss.
+        depth = torch.sum(mu_vec*BG_R, dim=1, keepdim=True)
+        depth = torch.max(depth,torch.zeros_like(depth))
+        # TODO: consider changing to max(x,0) and ignore 0 pixels in loss. - DONE!
         return depth
         
         
