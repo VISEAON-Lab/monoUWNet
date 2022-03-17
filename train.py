@@ -8,6 +8,9 @@ os.environ["NUMEXPR_NUM_THREADS"] = "1" # export NUMEXPR_NUM_THREADS=6
 from trainer import Trainer
 from options import MonodepthOptions
 
+import os
+os.environ['CUDA_VISIBLE_DEVICES']='1'
+
 options = MonodepthOptions()
 opts = options.parse()
 
