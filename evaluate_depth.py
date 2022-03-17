@@ -254,9 +254,10 @@ def evaluate(opt):
 
         img_list = []
         img_list.append(color)
+        img_list.append(depth_colorize(inGT))
         img_list.append(depth_colorize(outPred))
         img_merge = np.hstack(img_list)
-        plt.imsave(save_dir + "/frame_{:06d}_rgb_vs_pred.bmp".format(i), img_merge)
+        plt.imsave(save_dir + "/frame_{:06d}_res_comparison.bmp".format(i), img_merge)
         ##
 
                 ## debug A

@@ -210,7 +210,10 @@ class Trainer:
         """
         self.init_time = time.time()
         if isinstance(self.opt.load_weights_folder,str):
-            self.epoch_start = int(self.opt.load_weights_folder[-1]) + 1
+            try:
+                self.epoch_start = int(self.opt.load_weights_folder[-1]) + 1
+            except:
+                self.epoch_start=1 # weights_last
         else:
             self.epoch_start = 0
         self.step = 0
@@ -596,8 +599,8 @@ class Trainer:
         total_loss /= self.num_scales
 
         # correlation loss
-        corrLoss = corr_loss(inputs[("color", 0, 0)], inputs[("color", 0, 0)], outputs[('depth', 0, 0)])
-        total_loss += (1e-5*corrLoss)
+        # corrLoss = corr_loss(inputs[("color", 0, 0)], inputs[("color", 0, 0)], outputs[('depth', 0, 0)])
+        # total_loss += (1e-5*corrLoss)
 
         # BG_R loss
         bgrLoss = compute_bg_r_loss(outputs[('BG_R')], outputs[('depth', 0, 0)])
