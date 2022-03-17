@@ -9,6 +9,8 @@ from layers import upsample
 from my_utils import plotTensorMultiple, toNumpy, to_tensor
 from utils import estimateA
 
+device = "cuda"
+
 class HRDepthDecoder(nn.Module):
     def __init__(self, num_ch_enc, scales=range(4), num_output_channels=1, mobile_encoder=False):
         super(HRDepthDecoder, self).__init__()
@@ -136,7 +138,7 @@ class WaterTypeRegression(nn.Module):
         A/=batch_size
         # A = torch.tensor((0.5020, 0.7941, 0.4000))
 
-        A = torch.repeat_interleave(A.view(1,3,1,1),batch_size, dim=0)
+        A = torch.repeat_interleave(A.view(1,3,1,1),batch_size, dim=0).to(device)
 
         # print(A)
         J = (x - A) / TM + A
