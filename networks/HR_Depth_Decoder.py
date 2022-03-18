@@ -9,7 +9,7 @@ from layers import upsample
 from my_utils import plotTensorMultiple, toNumpy, to_tensor
 from utils import estimateA
 
-device = "cuda"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu") 
 
 class HRDepthDecoder(nn.Module):
     def __init__(self, num_ch_enc, scales=range(4), num_output_channels=1, mobile_encoder=False):

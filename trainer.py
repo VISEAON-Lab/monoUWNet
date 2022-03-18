@@ -64,14 +64,15 @@ class Trainer:
         self.models["depth"] = networks.HRDepthDecoder(
             self.models["encoder"].num_ch_enc, self.opt.scales)
         
-        self.models["bg2r"] = networks.BG2RCoeffsNetwork(64, 3)
-        self.models["bg2r"].to(self.device)
+        # self.models["bg2r"] = networks.BG2RCoeffsNetwork(64, 3)
+        # self.models["bg2r"].to(self.device)
 
         # 2nd NN
         self.models["recon"] = networks.WaterTypeRegression(3)
         self.models["recon"].to(self.device)
+        self.parameters_to_train += list(self.models["recon"].parameters())
         self.GWLoss = nn.L1Loss()
-        self.gwOptimizer = optim.SGD(self.models["recon"].parameters(), lr=1e-4)
+        # self.gwOptimizer = optim.SGD(self.models["recon"].parameters(), lr=1e-4)
 
         self.models["encoder"].to(self.device)
         self.parameters_to_train += list(self.models["encoder"].parameters())
@@ -300,9 +301,9 @@ class Trainer:
 
             outputs = self.models["depth"](features)
 
-            bg2rInFeatures = features[1][0]
-            BG_R = self.models["bg2r"](bg2rInFeatures, inputs["color_aug", 0, 0])
-            outputs["BG_R"] = BG_R
+            # bg2rInFeatures = features[1][0]
+            # BG_R = self.models["bg2r"](bg2rInFeatures, inputs["color_aug", 0, 0])
+            # outputs["BG_R"] = BG_R
         if self.opt.predictive_mask:
             outputs["predictive_mask"] = self.models["predictive_mask"](features)
             #different form 1:*:* depth maps ,it will output 2:*:* mask maps
