@@ -245,7 +245,7 @@ class Trainer:
             inputs[('color', 0, 0)].requires_grad=True
             recon = self.models["recon"](inputs[('color', 0, 0)],outputs[("depth", 0, 0)] )
             gwloss = self.computeGWLoss(recon)
-            losses["loss"]+=(1e-5)*gwloss
+            losses["loss"]+=(1e-7)*gwloss
             self.model_optimizer.zero_grad()
             losses["loss"].backward()
             self.model_optimizer.step()
