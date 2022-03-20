@@ -228,7 +228,7 @@ class Trainer:
             self.run_epoch()
             if (self.epoch + 1) % self.opt.save_frequency == 0:#number of epochs between each save defualt =1
                 self.save_model()
-                self.save_model(isLast=True)
+            self.save_model(isLast=True)
         self.total_training_time = time.time() - self.init_time
         print('====>total training time:{}'.format(sec_to_hm_str(self.total_training_time)))
 
