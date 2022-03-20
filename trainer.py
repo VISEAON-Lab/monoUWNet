@@ -64,14 +64,16 @@ class Trainer:
         self.models["depth"] = networks.HRDepthDecoder(
             self.models["encoder"].num_ch_enc, self.opt.scales)
         
-        # self.models["bg2r"] = networks.BG2RCoeffsNetwork(64, 3)
-        # self.models["bg2r"].to(self.device)
+        self.models["bg2r"] = networks.BG2RCoeffsNetwork(64, 3)
+        self.models["bg2r"].to(self.device)
+        self.parameters_to_train += list(self.models["bg2r"].parameters())
 
         # 2nd NN
-        self.models["recon"] = networks.WaterTypeRegression(3)
-        self.models["recon"].to(self.device)
-        self.parameters_to_train += list(self.models["recon"].parameters())
-        self.GWLoss = nn.L1Loss()
+        # self.models["recon"] = networks.WaterTypeRegression(3)
+        # self.models["recon"].to(self.device)
+        # self.parameters_to_train += list(self.models["recon"].parameters())
+        # self.GWLoss = nn.L1Loss()
+        
         # self.gwOptimizer = optim.SGD(self.models["recon"].parameters(), lr=1e-4)
 
         self.models["encoder"].to(self.device)
@@ -241,11 +243,13 @@ class Trainer:
         for batch_idx, inputs in enumerate(self.train_loader):
             before_op_time = time.time()
             outputs, losses = self.process_batch(inputs)
+            
             # add 2nd NN
-            inputs[('color', 0, 0)].requires_grad=True
-            recon = self.models["recon"](inputs[('color', 0, 0)],outputs[("depth", 0, 0)] )
-            gwloss = self.computeGWLoss(recon)
-            losses["loss"]+=(1e-7)*gwloss
+            # inputs[('color', 0, 0)].requires_grad=True
+            # recon = self.models["recon"](inputs[('color', 0, 0)],outputs[("depth", 0, 0)] )
+            # gwloss = self.computeGWLoss(recon)
+            # losses["loss"]+=(1e-7)*gwloss
+
             self.model_optimizer.zero_grad()
             losses["loss"].backward()
             self.model_optimizer.step()
@@ -301,9 +305,9 @@ class Trainer:
 
             outputs = self.models["depth"](features)
 
-            # bg2rInFeatures = features[1][0]
-            # BG_R = self.models["bg2r"](bg2rInFeatures, inputs["color_aug", 0, 0])
-            # outputs["BG_R"] = BG_R
+            bg2rInFeatures = features[1][0]
+            BG_R = self.models["bg2r"](bg2rInFeatures, inputs["color_aug", 0, 0])
+            outputs["BG_R"] = BG_R
         if self.opt.predictive_mask:
             outputs["predictive_mask"] = self.models["predictive_mask"](features)
             #different form 1:*:* depth maps ,it will output 2:*:* mask maps
@@ -625,8 +629,8 @@ class Trainer:
         # total_loss += (1e-5*corrLoss)
 
         # BG_R loss
-        # bgrLoss = compute_bg_r_loss(outputs[('BG_R')], outputs[('depth', 0, 0)])
-        # total_loss += (1e-7*bgrLoss)
+        bgrLoss = compute_bg_r_loss(outputs[('BG_R')], outputs[('depth', 0, 0)])
+        total_loss += (1e-7*bgrLoss)
 
         ## debug A
         if 0:
