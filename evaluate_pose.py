@@ -12,7 +12,7 @@ from options import MonodepthOptions
 from datasets import KITTIOdomDataset
 import datasets
 import networks
-
+import matplotlib.pyplot as plt
 
 # from https://github.com/tinghuiz/SfMLearner
 def dump_xyz(source_to_target_transformations):
@@ -57,7 +57,7 @@ def evaluate(opt):
     #     os.path.join(os.path.dirname(__file__), "splits", "odom",
     #                  "test_files_{:02d}.txt".format(sequence_id)))
     splits_dir = os.path.join(os.path.dirname(__file__), "splits")
-    filenames = readlines(os.path.join(splits_dir, opt.eval_split, "val_files.txt"))
+    filenames = readlines(os.path.join(splits_dir, opt.eval_split, "all_files.txt"))
     # dataset = KITTIOdomDataset(opt.data_path, filenames, opt.height, opt.width,
     #                          [0, 1], 4, is_train=False)
 
@@ -123,19 +123,24 @@ def evaluate(opt):
     ates = []
     pts=[]
     num_frames = pred_poses.shape[0]
-    track_length = 5
-    for i in range(0, num_frames - 1):
-        local_xyzs = np.array(dump_xyz(pred_poses[i:i + track_length - 1]))
+    track_length = 125
+    local_xyzs = np.array(dump_xyz(pred_poses))
         # gt_local_xyzs = np.array(dump_xyz(gt_local_poses[i:i + track_length - 1]))
-        pts.append(local_xyzs)
+        # pts.append(local_xyzs)
         # ates.append(compute_ate(gt_local_xyzs, local_xyzs))
 
-    print("\n   Trajectory error: {:0.3f}, std: {:0.3f}\n".format(np.mean(ates), np.std(ates)))
-
-    save_path = os.path.join(opt.load_weights_folder, "poses.npy")
+    save_path = os.path.join(opt.load_weights_folder, opt.eval_split+ "_poses.npy")
     np.save(save_path, pred_poses)
     print("-> Predictions saved to", save_path)
 
+    fig = plt.figure(figsize=(4,4))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(local_xyzs[:,0], local_xyzs[:,1], local_xyzs[:,2])
+    plt.show()
+
+    print("\n   Trajectory error: {:0.3f}, std: {:0.3f}\n".format(np.mean(ates), np.std(ates)))
+
+  
 
 if __name__ == "__main__":
     options = MonodepthOptions()
