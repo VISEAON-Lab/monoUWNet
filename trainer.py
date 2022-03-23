@@ -64,9 +64,9 @@ class Trainer:
         self.models["depth"] = networks.HRDepthDecoder(
             self.models["encoder"].num_ch_enc, self.opt.scales)
         
-        self.models["bg2r"] = networks.BG2RCoeffsNetwork(64, 3)
-        self.models["bg2r"].to(self.device)
-        self.parameters_to_train += list(self.models["bg2r"].parameters())
+        # self.models["bg2r"] = networks.BG2RCoeffsNetwork(64, 3)
+        # self.models["bg2r"].to(self.device)
+        # self.parameters_to_train += list(self.models["bg2r"].parameters())
 
         # 2nd NN
         # self.models["recon"] = networks.WaterTypeRegression(3)
@@ -305,9 +305,9 @@ class Trainer:
 
             outputs = self.models["depth"](features)
 
-            bg2rInFeatures = features[1][0]
-            BG_R = self.models["bg2r"](bg2rInFeatures, inputs["color_aug", 0, 0])
-            outputs["BG_R"] = BG_R
+            # bg2rInFeatures = features[1][0]
+            # BG_R = self.models["bg2r"](bg2rInFeatures, inputs["color_aug", 0, 0])
+            # outputs["BG_R"] = BG_R
         if self.opt.predictive_mask:
             outputs["predictive_mask"] = self.models["predictive_mask"](features)
             #different form 1:*:* depth maps ,it will output 2:*:* mask maps
@@ -625,12 +625,12 @@ class Trainer:
         total_loss /= self.num_scales
 
         # correlation loss
-        # corrLoss = corr_loss(inputs[("color", 0, 0)], inputs[("color", 0, 0)], outputs[('depth', 0, 0)])
-        # total_loss += (1e-5*corrLoss)
+        corrLoss = corr_loss(inputs[("color", 0, 0)], inputs[("color", 0, 0)], outputs[('depth', 0, 0)])
+        total_loss += (1e-5*corrLoss)
 
         # BG_R loss
-        bgrLoss = compute_bg_r_loss(outputs[('BG_R')], outputs[('depth', 0, 0)])
-        total_loss += (1e-7*bgrLoss)
+        # bgrLoss = compute_bg_r_loss(outputs[('BG_R')], outputs[('depth', 0, 0)])
+        # total_loss += (1e-7*bgrLoss)
 
         ## debug A
         if 0:

@@ -270,7 +270,7 @@ class LocalVariation(nn.Module):
         sigma_y  = self.sig_y_pool(y ** 2) - mu_y ** 2
         lv = sigma_x + sigma_y
 
-        return lv
+        return sigma_y
 
 
 def compute_bg_r_loss(bg_r, depth):
