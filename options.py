@@ -70,6 +70,9 @@ class MonodepthOptions:
         self.parser.add_argument("--use_stereo",
                                  help="if set, uses stereo pair for training",
                                  action="store_true")
+        self.parser.add_argument("--use_recons_net",
+                                 help="if set, uses reconstruction net for training",
+                                 action="store_true")
         self.parser.add_argument("--use_depth",
                                  help="if set, uses depth GT for training",
                                  action="store_true")

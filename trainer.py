@@ -69,10 +69,11 @@ class Trainer:
         # self.parameters_to_train += list(self.models["bg2r"].parameters())
 
         # 2nd NN
-        # self.models["recon"] = networks.WaterTypeRegression(3)
-        # self.models["recon"].to(self.device)
-        # self.parameters_to_train += list(self.models["recon"].parameters())
-        # self.GWLoss = nn.L1Loss()
+        if self.opt.use_recons_net:
+            self.models["recon"] = networks.WaterTypeRegression(3)
+            self.models["recon"].to(self.device)
+            self.parameters_to_train += list(self.models["recon"].parameters())
+            self.GWLoss = nn.L1Loss()
         
         # self.gwOptimizer = optim.SGD(self.models["recon"].parameters(), lr=1e-4)
 
@@ -316,7 +317,13 @@ class Trainer:
             outputs.update(self.predict_poses(inputs, features))
 
         self.generate_images_pred(inputs, outputs)
+
+        if self.opt.use_recons_net:
+            inputs[('color', 0, 0)].requires_grad=True
+            outputs['recon'] = self.models["recon"](inputs[('color', 0, 0)],outputs[("depth", 0, 0)] )
+
         losses = self.compute_losses(inputs, outputs)
+
 
         return outputs, losses
 
@@ -631,6 +638,11 @@ class Trainer:
         # BG_R loss
         # bgrLoss = compute_bg_r_loss(outputs[('BG_R')], outputs[('depth', 0, 0)])
         # total_loss += (1e-7*bgrLoss)
+
+        if self.opt.use_recons_net:
+        # GW loss
+            gwloss = self.computeGWLoss(outputs['recon'])
+            total_loss+=(1e-5)*gwloss
 
         ## debug A
         if 0:

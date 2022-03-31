@@ -242,7 +242,7 @@ def evaluate(opt):
         save_path = os.path.join(save_dir, "{:010d}.png".format(i))
         plt.imsave(save_dir + "/frame_{:06d}_color.jpg".format(i), inputColor)
         plt.imsave(save_dir + "/frame_{:06d}_disp.bmp".format(i), outPred)
-        # plt.imsave(save_dir + "/frame_{:06d}_gt.bmp".format(i), inGT)
+        plt.imsave(save_dir + "/frame_{:06d}_gt.bmp".format(i), inGT)
 
         color = (inputColor*255).astype(np.uint8)
         cmap = plt.cm.jet

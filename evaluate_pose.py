@@ -144,4 +144,19 @@ def evaluate(opt):
 
 if __name__ == "__main__":
     options = MonodepthOptions()
-    evaluate(options.parse())
+    if 0:
+        evaluate(options.parse())
+    else:
+        pred_poses = np.load('FLC_poses.npy')
+        local_xyzs = np.array(dump_xyz(pred_poses))
+        dr = abs(np.diff(local_xyzs, axis=0))
+        dr_mu = np.mean(dr, axis=0)
+        print(dr_mu)
+        fig = plt.figure(figsize=(4,4))
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(local_xyzs[:,0], local_xyzs[:,1], local_xyzs[:,2])
+        plt.show()
+
+
+# flc deltas: [0.0017622  0.00168929 0.00175339]
+# sc deltas: [0.00149089 0.00203293 0.00153094]
