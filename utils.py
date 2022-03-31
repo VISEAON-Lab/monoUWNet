@@ -10,7 +10,7 @@ from my_utils import toNumpy
 
 class HomomorphicFilter:
     """Homomorphic filter implemented with diferents filters and an option to an external filter.
-    
+    https://github.com/glasgio/homomorphic-filter/blob/eacc5d236ee2f15a40db120fd16d8221d61859bf/homofilt.py#L5
     High-frequency filters implemented:
         butterworth
         gaussian
