@@ -87,8 +87,10 @@ class MonoDataset(data.Dataset):
             s = 2 ** i
             self.resize[i] = transforms.Resize((self.height // s, self.width // s),
                                                interpolation=self.interp)
+        self.use_hf = False
         if opts is not None:
             self.load_depth = opts.use_depth
+            self.use_hf = opts.use_homomorphic_filt
         else:
             self.load_depth = self.check_depth()
 

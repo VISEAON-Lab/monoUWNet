@@ -99,7 +99,7 @@ def test_simple(args):
         output_directory = os.path.dirname(args.image_path)
     elif os.path.isdir(args.image_path):
         # Searching folder for images
-        paths = glob.glob(os.path.join(args.image_path, '*.{}'.format('bmp')))
+        paths = glob.glob(os.path.join(args.image_path, '*.{}'.format('png')))
         output_directory = args.image_path
     else:
         raise Exception("Can not find args.image_path: {}".format(args.image_path))
