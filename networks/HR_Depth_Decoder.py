@@ -96,9 +96,9 @@ class WaterTypeRegression(nn.Module):
         self.model = nn.Sequential(
             nn.Conv2d(in_channel, 16, 3, padding = 1),
             nn.MaxPool2d(2, stride = 2),
-            nn.Conv2d(16, 8, 5, padding = 1),
+            nn.Conv2d(16, 8, 5, padding = 1, stride = 2),
             nn.Flatten(),
-            nn.Linear(605472, 256),
+            nn.Linear(151368, 256),
             nn.ReLU(),
             nn.Linear(256, 32),
             nn.ReLU(),            
