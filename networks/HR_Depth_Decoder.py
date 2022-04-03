@@ -122,16 +122,16 @@ class WaterTypeRegression(nn.Module):
         input_tensor = x.clone()
         # self.print_sizes(self.model, input_tensor)
         #Normalise in forward from fit()
-        mean = torch.mean(x)
-        std = torch.std(x)
-        x = (x - mean) / std
+        mean = torch.mean(input_tensor)
+        std = torch.std(input_tensor)
+        input_tensor = (input_tensor - mean) / std
 
         # x = x.reshape(-1, 3, 32, 32)
-        TM = torch.exp(-self.model(x).view(-1, 3, 1, 1)*d)
-        batch_size = x.shape[0]
+        TM = torch.exp(-self.model(input_tensor).view(-1, 3, 1, 1)*d)
+        batch_size = input_tensor.shape[0]
         A = torch.zeros(1,3)
         for i in range(batch_size):
-            img = toNumpy(input_tensor[i,:,:,:])
+            img = toNumpy(x[i,:,:,:])
             depth = toNumpy(d[i,:,:])
             Ai = torch.from_numpy(estimateA(img, depth))
             A+=Ai
