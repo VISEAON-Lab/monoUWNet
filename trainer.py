@@ -512,7 +512,7 @@ class Trainer:
         # if mask is not None:
         #     weights_mask = normalize_image(mask)
         #     reprojection_loss*=weights_mask
-        self.lv = LocalVariation(k_size=15)
+        self.lv = LocalVariation(k_size=35)
         lv = normalize_image(self.lv(pred, target).mean(1, True))
         reprojection_loss*=lv
         # if mask is not None:
