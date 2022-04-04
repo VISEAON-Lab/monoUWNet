@@ -135,6 +135,15 @@ def evaluate(opt):
     depth_decoder.to(device)
     depth_decoder.eval()
     
+    if opt.use_recons_net:
+        reconNet_path = os.path.join(opt.load_weights_folder, "recon.pth")
+        reconNet_dict = torch.load(reconNet_path, map_location=torch.device(device)) 
+        reconNet = networks.WaterTypeRegression(3)
+        recon_model_dict = reconNet.state_dict()
+        reconNet.load_state_dict({k: v for k, v in reconNet_dict.items() if k in recon_model_dict})
+        
+
+
     pred_disps = []
     input_colors = []
     gt_depths = []
@@ -154,6 +163,9 @@ def evaluate(opt):
                 input_color = torch.cat((input_color, torch.flip(input_color, [3])), 0)
 
             output = depth_decoder(encoder(input_color))
+
+            if opt.use_recons_net:
+                output['recon'] = reconNet["recon"](input_color,output[("depth", 0, 0)] )
 
             pred_disp_0, _ = disp_to_depth(output[("disp", 0)], opt.min_depth, opt.max_depth)
             pred_disp = pred_disp_0.cpu()[:, 0].numpy()
@@ -240,6 +252,10 @@ def evaluate(opt):
         # depth = np.clip(depth, 0, 80)/10
         # depth = np.uint8(depth * 256)
         save_path = os.path.join(save_dir, "{:010d}.png".format(i))
+
+        if opt.use_recons_net:
+            J = (normalize_numpy(gt_depths[i])*255).astype(np.uint8) # TODO fix this to J!!
+
         plt.imsave(save_dir + "/frame_{:06d}_color.jpg".format(i), inputColor)
         plt.imsave(save_dir + "/frame_{:06d}_disp.bmp".format(i), outPred)
         plt.imsave(save_dir + "/frame_{:06d}_gt.bmp".format(i), inGT)

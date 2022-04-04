@@ -99,7 +99,7 @@ def test_simple(args):
         output_directory = os.path.dirname(args.image_path)
     elif os.path.isdir(args.image_path):
         # Searching folder for images
-        paths = glob.glob(os.path.join(args.image_path, '*.{}'.format('png')))
+        paths = glob.glob(os.path.join(args.image_path, '*/*.{}'.format('tif')))
         output_directory = args.image_path
     else:
         raise Exception("Can not find args.image_path: {}".format(args.image_path))
@@ -153,7 +153,7 @@ def test_simple(args):
             print(disp_resized_np.shape)
             vmax = np.percentile(disp_resized_np, 95)
             normalizer = mpl.colors.Normalize(vmin=disp_resized_np.min(), vmax=vmax)
-            mapper = cm.ScalarMappable(norm=normalizer, cmap='magma')
+            mapper = cm.ScalarMappable(norm=normalizer, cmap='jet')
             colormapped_im = (mapper.to_rgba(disp_resized_np)[:, :, :3] * 255).astype(np.uint8)
             im = pil.fromarray(colormapped_im)
             name_dest_im = os.path.join('results',"{}_disp.jpeg".format(image_name))
@@ -165,9 +165,9 @@ def test_simple(args):
             scaled_disp = (50 / scaled_disp).squeeze().cpu().numpy()
             #scaled_disp = scaled_disp.squeeze().cpu().numpy()
             im_grey = pil.fromarray(np.uint8((scaled_disp * 255)),'L')
-            name_grey_depth = os.path.join('results',"{}_grey_disp.png".format(image_name))
-            name_corped_rgb = os.path.join('results',"rgb.png")
-            im_grey.save(name_grey_depth) 
+            # name_grey_depth = os.path.join('results',"{}_grey_disp.png".format(image_name))
+            name_corped_rgb = os.path.join('results',"{}_rgb.png".format(image_name))
+            # im_grey.save(name_grey_depth) 
             input_r.save(name_corped_rgb)
             #just save a single depth
             im.save(name_dest_im)
