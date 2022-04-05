@@ -142,7 +142,8 @@ def evaluate(opt):
         recon_model_dict = reconNet.state_dict()
         reconNet.load_state_dict({k: v for k, v in reconNet_dict.items() if k in recon_model_dict})
         
-
+        reconNet.to(device)
+        reconNet.eval()
 
     pred_disps = []
     pred_Js = []
