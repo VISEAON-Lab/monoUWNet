@@ -119,17 +119,17 @@ class WaterTypeRegression(nn.Module):
         @param x: an (N, in_size) torch tensor
         @return y: an (N, out_size) torch tensor of output from the network
         """
-        input_tensor = x.clone()
-        # self.print_sizes(self.model, input_tensor)
-        #Normalise in forward from fit()
-        mean = torch.mean(input_tensor)
-        std = torch.std(input_tensor)
-        input_tensor = (input_tensor - mean) / std
+        # input_tensor = x.clone()
+        # # self.print_sizes(self.model, input_tensor)
+        # #Normalise in forward from fit()
+        # mean = torch.mean(input_tensor)
+        # std = torch.std(input_tensor)
+        # input_tensor = (input_tensor - mean) / std
 
         # x = x.reshape(-1, 3, 32, 32)
-        wt_coeffs = self.model(input_tensor).view(-1, 3, 1, 1)
+        wt_coeffs = self.model(x).view(-1, 3, 1, 1)
         TM = torch.exp(-wt_coeffs*d)
-        batch_size = input_tensor.shape[0]
+        batch_size = x.shape[0]
         A = torch.zeros(1,3)
         for i in range(batch_size):
             img = toNumpy(x[i,:,:,:])
