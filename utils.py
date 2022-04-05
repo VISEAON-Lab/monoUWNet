@@ -264,7 +264,7 @@ def homorphicFiltering(img, G=None):
 
     homo_filter = HomomorphicFilter(a = 0.75, b = 1.25)
     homo_filter = HomomorphicFilter()
-    img_filtered = homo_filter.filter(I=y, filter_params=[10,2]).astype(np.float32)
+    img_filtered = homo_filter.filter(I=y, filter_params=[20,2]).astype(np.float32)
 
 
     rgb = np.dstack((img_filtered,cr,cb)) 

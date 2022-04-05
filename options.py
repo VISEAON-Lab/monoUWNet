@@ -73,6 +73,9 @@ class MonodepthOptions:
         self.parser.add_argument("--use_recons_net",
                                  help="if set, uses reconstruction net for training",
                                  action="store_true")
+        self.parser.add_argument("--use_lvw",
+                                 help="if set, uses local variation weight on loss for training",
+                                 action="store_true")
         self.parser.add_argument("--use_homomorphic_filt",
                                  help="if set, uses homomorphic_filt for training",
                                  action="store_true")
