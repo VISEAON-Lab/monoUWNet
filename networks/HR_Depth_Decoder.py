@@ -127,7 +127,8 @@ class WaterTypeRegression(nn.Module):
         input_tensor = (input_tensor - mean) / std
 
         # x = x.reshape(-1, 3, 32, 32)
-        TM = torch.exp(-self.model(input_tensor).view(-1, 3, 1, 1)*d)
+        wt_coeffs = self.model(input_tensor).view(-1, 3, 1, 1)
+        TM = torch.exp(-wt_coeffs*d)
         batch_size = input_tensor.shape[0]
         A = torch.zeros(1,3)
         for i in range(batch_size):
@@ -142,7 +143,7 @@ class WaterTypeRegression(nn.Module):
 
         # print(A)
         J = (x - A) / TM + A
-        return J
+        return J, wt_coeffs
 
 
 class BG2RCoeffsNetwork(nn.Module):

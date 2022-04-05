@@ -320,7 +320,7 @@ class Trainer:
 
         if self.opt.use_recons_net:
             inputs[('color', 0, 0)].requires_grad=True
-            outputs['recon'] = self.models["recon"](inputs[('color', 0, 0)],outputs[("depth", 0, 0)] )
+            outputs['recon'], coeffs = self.models["recon"](inputs[('color', 0, 0)],outputs[("depth", 0, 0)] )
 
         losses = self.compute_losses(inputs, outputs)
 

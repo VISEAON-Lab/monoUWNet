@@ -145,6 +145,7 @@ def evaluate(opt):
 
 
     pred_disps = []
+    pred_Js = []
     input_colors = []
     gt_depths = []
     print('-->Using\n cuda') if torch.cuda.is_available() else print('-->Using\n CPU')
@@ -164,10 +165,13 @@ def evaluate(opt):
 
             output = depth_decoder(encoder(input_color))
 
-            if opt.use_recons_net:
-                output['recon'] = reconNet["recon"](input_color,output[("depth", 0, 0)] )
+            pred_disp_0, depth = disp_to_depth(output[("disp", 0)], opt.min_depth, opt.max_depth)
 
-            pred_disp_0, _ = disp_to_depth(output[("disp", 0)], opt.min_depth, opt.max_depth)
+            if opt.use_recons_net:
+                J, coeffs = reconNet(input_color,depth )
+                pred_Js.append(normalize_numpy(toNumpy(J.cpu(), keepDim=True)))
+                
+     
             pred_disp = pred_disp_0.cpu()[:, 0].numpy()
             #pred_disp_viz = pred_disp_0.squeeze()
 
@@ -186,6 +190,8 @@ def evaluate(opt):
     pred_disps = np.concatenate(pred_disps)
     input_colors = np.concatenate(input_colors)
     gt_depths = np.concatenate(gt_depths)
+    if opt.use_recons_net:
+        pred_Js = np.concatenate(pred_Js)
   
     
     
@@ -254,7 +260,9 @@ def evaluate(opt):
         save_path = os.path.join(save_dir, "{:010d}.png".format(i))
 
         if opt.use_recons_net:
-            J = (normalize_numpy(gt_depths[i])*255).astype(np.uint8) # TODO fix this to J!!
+            pred_Js
+            J = pred_Js[i]
+            plt.imsave(save_dir + "/frame_{:06d}_color_recons.jpg".format(i), J)
 
         plt.imsave(save_dir + "/frame_{:06d}_color.jpg".format(i), inputColor)
         plt.imsave(save_dir + "/frame_{:06d}_disp.bmp".format(i), outPred)
