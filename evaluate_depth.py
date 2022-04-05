@@ -168,7 +168,7 @@ def evaluate(opt):
             pred_disp_0, depth = disp_to_depth(output[("disp", 0)], opt.min_depth, opt.max_depth)
 
             if opt.use_recons_net:
-                J, coeffs = reconNet(input_color,depth )
+                J, coeffs = reconNet(input_color.to(device),depth.to(device) )
                 pred_Js.append(normalize_numpy(toNumpy(J.cpu(), keepDim=True)))
                 
      
