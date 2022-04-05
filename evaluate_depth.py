@@ -233,7 +233,7 @@ def evaluate(opt):
  
         mask = gt_depth > 0
         
-        
+        outDepth = cv2.resize(pred_depth, (opt.width, opt.height))
         pred_depth = pred_depth[mask]
         gt_depth = gt_depth[mask]
 
@@ -250,8 +250,10 @@ def evaluate(opt):
         errors.append(compute_errors(gt_depth, pred_depth))
 
         # dump images
+        
         disp_resized = cv2.resize(pred_disps[i], (opt.width, opt.height))
         outPred = (normalize_numpy(pred_disps[i])*255).astype(np.uint8)
+        outDepth = (normalize_numpy(outDepth)*255).astype(np.uint8)
         inGT = (normalize_numpy(gt_depths[i])*255).astype(np.uint8)
         inGT = np.squeeze(inGT)
         inputColor = input_colors[i]
@@ -280,7 +282,7 @@ def evaluate(opt):
         img_list = []
         img_list.append(color)
         img_list.append(depth_colorize(cv2.resize(inGT, (outPred.shape[1], outPred.shape[0]))))
-        img_list.append(depth_colorize(outPred))
+        img_list.append(depth_colorize(outDepth))
         img_merge = np.hstack(img_list)
         plt.imsave(save_dir + "/frame_{:06d}_res_comparison.bmp".format(i), img_merge)
         ##
