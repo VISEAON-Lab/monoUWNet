@@ -233,7 +233,7 @@ def evaluate(opt):
  
         mask = gt_depth > 0
         
-        outDepth = cv2.resize(pred_depth, (opt.width, opt.height))
+        # outDepth = cv2.resize(pred_depth, (opt.width, opt.height))
         pred_depth = pred_depth[mask]
         gt_depth = gt_depth[mask]
 
@@ -253,7 +253,8 @@ def evaluate(opt):
         
         disp_resized = cv2.resize(pred_disps[i], (opt.width, opt.height))
         outPred = (normalize_numpy(pred_disps[i])*255).astype(np.uint8)
-        outDepth = (normalize_numpy(outDepth)*255).astype(np.uint8)
+        _outDepth = 1 / pred_disps[i]
+        outDepth = (normalize_numpy(_outDepth)*255).astype(np.uint8)
         inGT = (normalize_numpy(gt_depths[i])*255).astype(np.uint8)
         inGT = np.squeeze(inGT)
         inputColor = input_colors[i]
