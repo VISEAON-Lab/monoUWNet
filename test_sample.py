@@ -99,7 +99,7 @@ def test_simple(args):
         output_directory = os.path.dirname(args.image_path)
     elif os.path.isdir(args.image_path):
         # Searching folder for images
-        paths = glob.glob(os.path.join(args.image_path, '*/*.{}'.format('tif')))
+        paths = glob.glob(os.path.join(args.image_path, '**/*.{}'.format('png')), recursive=True)
         output_directory = args.image_path
     else:
         raise Exception("Can not find args.image_path: {}".format(args.image_path))
@@ -146,7 +146,9 @@ def test_simple(args):
             output_name = os.path.splitext(os.path.basename(image_path))[0]
             name_dest_npy = os.path.join(output_directory, "{}_disp.npy".format(output_name))
             scaled_disp, depth_resized = disp_to_depth(disp, 0.1, 100)
-            np.save(name_dest_npy, scaled_disp.cpu().numpy())
+            # np.save(name_dest_npy, scaled_disp.cpu().numpy())
+            outPath = image_path.replace('.png', '_depth.npy')
+            np.save(outPath, depth_resized.cpu().numpy())
 
             # Saving colormapped depth image
             disp_resized_np = disp_resized.squeeze().cpu().numpy()
