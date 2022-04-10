@@ -644,7 +644,7 @@ class Trainer:
         if self.opt.use_recons_net:
         # GW loss
             gwloss = self.computeGWLoss(outputs['recon'])
-            total_loss+=(1e-5)*gwloss
+            total_loss+=(1e-3)*gwloss
 
         ## debug A
         if 0:
