@@ -636,6 +636,7 @@ class Trainer:
         # correlation loss
         corrLoss = corr_loss(inputs[("color", 0, 0)], inputs[("color", 0, 0)], outputs[('depth', 0, 0)])
         total_loss += (1e-5*corrLoss)
+        losses["loss/corrLoss"] = corrLoss
 
         # BG_R loss
         # bgrLoss = compute_bg_r_loss(outputs[('BG_R')], outputs[('depth', 0, 0)])
@@ -643,8 +644,14 @@ class Trainer:
 
         if self.opt.use_recons_net:
         # GW loss
+            w=1e-6
+            if self.epoch>20:
+                w=1e-4
+            if self.epoch>25:
+                w=1e-1
             gwloss = self.computeGWLoss(outputs['recon'])
-            total_loss+=(1e-3)*gwloss
+            total_loss+=(w)*gwloss
+            losses["loss/gwloss"] = gwloss
 
         ## debug A
         if 0:
