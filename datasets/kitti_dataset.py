@@ -10,7 +10,7 @@ import os
 import skimage.transform
 import numpy as np
 import PIL.Image as pil
-
+import cv2
 from kitti_utils import generate_depth_map
 from .mono_dataset import MonoDataset
 
@@ -49,7 +49,9 @@ class KITTIDataset(MonoDataset):
             # dehaze color
             preEstDepthPath = self.get_image_path(folder, frame_index, side)
             preEstDepthPath = preEstDepthPath.replace('.png', '_depth.npy')
-            depth = np.load(preEstDepthPath)
+            depth = np.squeeze(np.load(preEstDepthPath))
+            depth = cv2.resize(depth, dsize=(color.width, color.height), interpolation=cv2.INTER_NEAREST)
+            depth = np.stack((depth,)*3, axis=-1)
             # a_inf = 1, beta=1
             beta=1; a_inf = np.array([1, 1, 1])
             hcolor = np.array(color).astype(np.float32)/255*np.exp(-depth)+(1-np.exp(-depth))
