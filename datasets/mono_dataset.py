@@ -89,6 +89,7 @@ class MonoDataset(data.Dataset):
                                                interpolation=self.interp)
         self.use_hf = False
         if opts is not None:
+            self.use_preEst_depth = opts.use_preEst_depth
             self.load_depth = opts.use_depth
             self.use_hf = opts.use_homomorphic_filt
         else:

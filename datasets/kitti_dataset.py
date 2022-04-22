@@ -45,7 +45,15 @@ class KITTIDataset(MonoDataset):
 
     def get_color(self, folder, frame_index, side, do_flip):
         color = self.loader(self.get_image_path(folder, frame_index, side))
-
+        if self.use_preEst_depth:
+            # dehaze color
+            preEstDepthPath = self.get_image_path(folder, frame_index, side)
+            preEstDepthPath = preEstDepthPath.replace('.png', '_depth.npy')
+            depth = np.load(preEstDepthPath)
+            # a_inf = 1, beta=1
+            beta=1; a_inf = np.array([1, 1, 1])
+            hcolor = np.array(color).astype(np.float32)/255*np.exp(-depth)+(1-np.exp(-depth))
+            color = pil.fromarray((hcolor*255).astype('uint8'), 'RGB')
         if do_flip:
             color = color.transpose(pil.FLIP_LEFT_RIGHT)
 
