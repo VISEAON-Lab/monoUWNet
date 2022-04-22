@@ -85,6 +85,9 @@ class MonodepthOptions:
         self.parser.add_argument("--use_preEst_depth",
                                  help="if set, uses depth pre estimation for training",
                                  action="store_true")
+        self.parser.add_argument("--use_corrLoss",
+                                 help="if set, uses use_corrLoss for training",
+                                 action="store_true")
         self.parser.add_argument("--frame_ids",
                                  nargs="+",
                                  type=int,

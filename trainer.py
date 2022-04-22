@@ -634,9 +634,10 @@ class Trainer:
         total_loss /= self.num_scales
 
         # correlation loss
-        corrLoss = corr_loss(inputs[("color", 0, 0)], inputs[("color", 0, 0)], outputs[('depth', 0, 0)])
-        total_loss += (1e-5*corrLoss)
-        losses["loss/corrLoss"] = corrLoss
+        if self.opt.use_corrLoss:
+            corrLoss = corr_loss(inputs[("color", 0, 0)], inputs[("color", 0, 0)], outputs[('depth', 0, 0)])
+            total_loss += (1e-5*corrLoss)
+            losses["loss/corrLoss"] = corrLoss
 
         # BG_R loss
         # bgrLoss = compute_bg_r_loss(outputs[('BG_R')], outputs[('depth', 0, 0)])
