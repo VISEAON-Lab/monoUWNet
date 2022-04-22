@@ -131,7 +131,7 @@ def evaluate(opt):
     if  opt.dataset=='kitti':
         dataset = datasets.KITTIRAWDataset(opt.dataset, opt.data_path, filenames,
                                            encoder_dict['height'], encoder_dict['width'],
-                                           [0], 4, is_train=False)
+                                           [0], 4, is_train=False, opts = opt)
     elif opt.dataset=='sc': # aqualoc
         dataset = datasets.SCDataset(opt.dataset, opt.data_path, filenames,
                                         encoder_dict['height'], encoder_dict['width'],
