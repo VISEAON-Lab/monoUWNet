@@ -73,7 +73,7 @@ class Trainer:
             self.models["recon"] = networks.WaterTypeRegression(3)
             self.models["recon"].to(self.device)
             self.parameters_to_train += list(self.models["recon"].parameters())
-            self.GWLoss = nn.L1Loss()
+            self.GWLoss = nn.MSELoss()
         
         # self.gwOptimizer = optim.SGD(self.models["recon"].parameters(), lr=1e-4)
 
@@ -645,11 +645,11 @@ class Trainer:
 
         if self.opt.use_recons_net:
         # GW loss
-            w=1e-6
+            w=0
             if self.epoch>20:
                 w=1e-4
             if self.epoch>25:
-                w=1e-1
+                w=1
             gwloss = self.computeGWLoss(outputs['recon'])
             total_loss+=(w)*gwloss
             losses["loss/gwloss"] = gwloss
