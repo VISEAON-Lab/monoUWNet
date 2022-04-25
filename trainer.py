@@ -73,7 +73,7 @@ class Trainer:
             self.models["recon"] = networks.WaterTypeRegression(3)
             self.models["recon"].to(self.device)
             self.parameters_to_train += list(self.models["recon"].parameters())
-            self.GWLoss = nn.MSELoss()
+            self.GWLoss = nn.L1Loss()
         
         # self.gwOptimizer = optim.SGD(self.models["recon"].parameters(), lr=1e-4)
 
@@ -527,7 +527,7 @@ class Trainer:
         channelMu = torch.mean(img.view(img.shape[0], img.shape[1],-1), dim=2)
         globalMu = globalMu.unsqueeze(1).repeat(1,3)
         gwloss = self.GWLoss(globalMu, channelMu)
-        # TODO: make sure rquires grad is on for the whole process
+        # TODO: try minimize only thr max error
         return gwloss
 
 
