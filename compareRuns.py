@@ -12,10 +12,12 @@ def pil_loader(path):
     with open(path, 'rb') as f:
         with Image.open(f) as img:
             return img.convert('RGB')
-
-folder1 = '/Users/shlomiamitai/work/myRepo/ANSFL/monocularDepthNN/myDIFFNet/models/20220324_sc_train_NO_lv_and_corrLoss_fromKittiWeight/models/weights_last/benchmark_predictions20220324_sc_train_NO_lv_and_corrLoss_fromKittiWeight_evaluation_flatiron'
-folder2 = '/Users/shlomiamitai/work/myRepo/ANSFL/monocularDepthNN/myDIFFNet/models/20220323_sc_train_lv_and_corrLoss_fromKittiWeight/models/weights_last/benchmark_predictions20220323_sc_train_lv_and_corrLoss_fromKittiWeight_evaluation_flatiron'
-outFolder = os.path.join('/Users/shlomiamitai/work/myRepo/ANSFL/monocularDepthNN/myDIFFNet/Comparisons', folder1.split('/')[-1] + '_VS_' + folder2.split('/')[-1])
+run1Name = '20220430_kitti_w_flip_beta=5'
+run2Name = '20220430_kitti_w_flip_beta=5_lvw'
+data='kitti'
+folder1 = '/home/samitai/Work/myDIFFNet/models/{}/models/weights_last/benchmark_predictions{}_evaluation_{}'.format(run1Name, run1Name, data)
+folder2 = '/home/samitai/Work/myDIFFNet/models/{}/models/weights_last/benchmark_predictions{}_evaluation_{}'.format(run2Name, run2Name, data)
+outFolder = os.path.join('/home/samitai/Work/myDIFFNet/Comparisons', folder1.split('/')[-1] + '_VS_' + folder2.split('/')[-1])
 if not os.path.exists(outFolder):
         os.makedirs(outFolder)
 
@@ -32,7 +34,7 @@ for file1 in resultFiles1:
         continue
     color1 = pil_loader(colorFile1)
     gt1 = pil_loader(gtFile1)
-    gt1 = gt1.resize((640, 480))
+    gt1 = gt1.resize((color1.width, color1.height))
     disp1 = pil_loader(file1)
     disp2 = pil_loader(file2)
     img_list = []
