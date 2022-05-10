@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 from my_utils import *
 import csv
 from datetime import datetime 
+from skyPixelSegmentation import find_sky_mask
 
 cv2.setNumThreads(0)  # This speeds up evaluation 5x on our unix systems (OpenCV 3.3.1)
 
@@ -212,6 +213,8 @@ def evaluate(opt):
 
     print("-> Evaluating")
 
+    if opt.eval_sky:
+        sky_errs=0
     errors = []
     ratios = []
     plt.set_cmap('jet')  
@@ -273,6 +276,27 @@ def evaluate(opt):
         plt.imsave(save_dir + "/frame_{:06d}_gt.bmp".format(i), inGT)
 
         color = (inputColor*255).astype(np.uint8)
+
+        if opt.eval_sky:
+            inGTMask = cv2.resize(inGT, (outPred.shape[1], outPred.shape[0]))
+            inGTMask[inGTMask>0]=255
+            inGTMask = inGTMask.astype(np.uint8)
+            kernel = np.ones((5, 5), 'uint8')       
+            inGTMask = cv2.dilate(inGTMask, kernel, iterations=1)
+            inGTMask = 255- inGTMask
+            sky_mask = find_sky_mask(color, inGTMask)
+            if np.any(sky_mask):
+                maxDepth = np.max(gt_depths[i])
+                height, width = sky_mask.shape[:2]
+                pred_depth = 1 / pred_disp
+                pred_depth *= ratio
+                pred_depth = cv2.resize(pred_depth, (width, height))
+                sky_abs_err = np.mean(np.abs(maxDepth - pred_depth[sky_mask>0]))
+                plt.imsave(save_dir + "/frame_{:06d}_sky_mask.bmp".format(i), sky_mask)
+                sky_errs+=sky_abs_err
+                # print(sky_abs_err)
+
+
         cmap = plt.cm.jet
 
         def depth_colorize(depth):
@@ -338,6 +362,19 @@ def evaluate(opt):
         "a2": np.round(mean_errors[5],3),
         "a3": np.round(mean_errors[6],3),
         }
+
+    if opt.eval_sky:
+        resdict = {
+            "time": time,
+            "abs_rel": np.round(mean_errors[0],3),
+            "sq_rel": np.round(mean_errors[1],3),
+            "rmse": np.round(mean_errors[2],3),
+            "rmse_log": np.round(mean_errors[3],3),
+            "a1": np.round(mean_errors[4],3),
+            "a2": np.round(mean_errors[5],3),
+            "a3": np.round(mean_errors[6],3),
+            "sky_err": np.round(sky_errs,3)
+            }
     writer.writerow(resdict.keys())
     writer.writerow(resdict.values())
 

@@ -146,7 +146,7 @@ def test_simple(args):
             output_name = os.path.splitext(os.path.basename(image_path))[0]
             name_dest_npy = os.path.join(output_directory, "{}_disp.npy".format(output_name))
             scaled_disp, depth_resized = disp_to_depth(disp, 0.1, 100)
-            # np.save(name_dest_npy, scaled_disp.cpu().numpy())
+            np.save(name_dest_npy, scaled_disp.cpu().numpy())
             outPath = image_path.replace('.png', '_depth.npy')
             np.save(outPath, depth_resized.cpu().numpy())
 

@@ -143,6 +143,9 @@ class MonodepthOptions:
                                  help="normal or shared",
                                  default="separate_resnet",
                                  choices=["posecnn", "separate_resnet", "shared"])
+        self.parser.add_argument("--eval_sky",
+                                 help="if set, consider sky in evaluation",
+                                 action="store_true")
 
         # SYSTEM options
         self.parser.add_argument("--no_cuda",
