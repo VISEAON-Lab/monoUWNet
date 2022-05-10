@@ -291,9 +291,11 @@ def evaluate(opt):
                 pred_depth = 1 / pred_disp
                 pred_depth *= ratio
                 pred_depth = cv2.resize(pred_depth, (width, height))
-                sky_abs_err = np.mean(np.abs(maxDepth - pred_depth[sky_mask>0]))
+                sky_abs_err = (maxDepth - pred_depth[sky_mask>0])
+                sky_abs_err[sky_abs_err<0] = 0
+                sky_err = np.mean(sky_abs_err)
                 plt.imsave(save_dir + "/frame_{:06d}_sky_mask.bmp".format(i), sky_mask)
-                sky_errs+=sky_abs_err
+                sky_errs+=sky_err
                 # print(sky_abs_err)
 
 
