@@ -121,7 +121,7 @@ def evaluate(opt):
 
     print("-> Loading weights from {}".format(opt.load_weights_folder))
 
-    filenames = readlines(os.path.join(splits_dir, opt.eval_split, "val_files.txt"))
+    filenames = readlines(os.path.join(splits_dir, opt.eval_split, "test_files.txt"))
     encoder_path = os.path.join(opt.load_weights_folder, "encoder.pth")
     decoder_path = os.path.join(opt.load_weights_folder, "depth.pth")
     
@@ -174,6 +174,7 @@ def evaluate(opt):
     pred_Js = []
     input_colors = []
     gt_depths = []
+    sky_masks=[]
     print('-->Using\n cuda') if torch.cuda.is_available() else print('-->Using\n CPU')
     print("-> Computing predictions with size {}x{}".format(
         encoder_dict['width'], encoder_dict['height']))
@@ -182,8 +183,8 @@ def evaluate(opt):
         # init_time = time.time()
         i = 0 
         for data in dataloader:
-            if i>1000:
-                break
+            # if i>1000:
+            #     break
             i += 1  
             print(str(i)+ ' out of ' + str(len(dataloader)))
             input_color = data[("color", 0, 0)].to(device)
@@ -208,6 +209,10 @@ def evaluate(opt):
                 N = pred_disp.shape[0] // 2
                 pred_disp = batch_post_process_disparity(pred_disp[:N], pred_disp[N:, :, ::-1])
 
+            if opt.eval_sky:
+                sky_mask = toNumpy(data['inputMask'].to(device).cpu(), keepDim=True)
+                sky_masks.append(sky_mask)
+
             pred_disps.append(pred_disp)
             input_colors.append(toNumpy(input_color.cpu(), keepDim=True))
             gt_depths.append((gt.cpu()))
@@ -221,8 +226,8 @@ def evaluate(opt):
     gt_depths = np.concatenate(gt_depths)
     if opt.use_recons_net:
         pred_Js = np.concatenate(pred_Js)
-  
-    
+    if opt.eval_sky:
+        sky_masks = np.concatenate(sky_masks)
     
     save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions"+opt.model_name)
     print("-> Saving out benchmark predictions to {}".format(save_dir))
@@ -310,19 +315,20 @@ def evaluate(opt):
             inGTMask = inGTMask.astype(np.uint8)
             kernel = np.ones((5, 5), 'uint8')       
             inGTMask = cv2.dilate(inGTMask, kernel, iterations=1)
-            inGTMask = 255- inGTMask
-            sky_mask = find_sky_mask(color, inGTMask)
+            inGTMask = np.expand_dims(255- inGTMask,0)
+            sky_mask = (np.sum(sky_masks[i],3)/3*255).astype(np.uint8)
+            sky_mask[inGTMask<255]=0
             if np.any(sky_mask):
                 maxDepth = np.max(gt_depths[i])
                 height, width = sky_mask.shape[:2]
                 pred_depth = 1 / pred_disp
                 pred_depth *= ratio
                 pred_depth = cv2.resize(pred_depth, (width, height))
-                sky_abs_err = np.mean(np.abs(maxDepth - pred_depth[sky_mask>0]))
+                sky_abs_err = (maxDepth - pred_depth[sky_mask>0])
+                sky_abs_err[sky_abs_err<0] = 0
+                sky_err = np.mean(sky_abs_err)
                 plt.imsave(save_dir + "/frame_{:06d}_sky_mask.bmp".format(i), sky_mask)
-                sky_errs+=sky_abs_err
-                # print(sky_abs_err)
-
+                sky_errs+=sky_err
 
         cmap = plt.cm.jet
 

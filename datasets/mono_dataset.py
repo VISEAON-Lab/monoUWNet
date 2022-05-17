@@ -16,6 +16,8 @@ import torch
 import torch.utils.data as data
 from torchvision import transforms
 
+from my_utils import ToTensor
+
 
 
 def pil_loader(path):
@@ -89,6 +91,7 @@ class MonoDataset(data.Dataset):
                                                interpolation=self.interp)
         self.use_hf = False
         if opts is not None:
+            self.getMask = opts.eval_sky
             self.use_preEst_depth = opts.use_preEst_depth
             self.load_depth = opts.use_depth
             self.use_hf = opts.use_homomorphic_filt
@@ -198,10 +201,15 @@ class MonoDataset(data.Dataset):
             del inputs[("color", i, -1)]
             del inputs[("color_aug", i, -1)]
 
-        if self.load_depth:
-            depth_gt = self.get_depth(folder, frame_index, side, do_flip)
-            inputs["depth_gt"] = np.expand_dims(depth_gt, 0)
-            inputs["depth_gt"] = torch.from_numpy(inputs["depth_gt"].astype(np.float32))
+        if self.getMask:
+            inputs["inputMask"] = self.get_mask(folder, frame_index, side, do_flip)
+            inputs["inputMask"] = self.resize[0](inputs["inputMask"])
+            inputs["inputMask"] = transforms.ToTensor()(inputs["inputMask"])
+
+        # if self.load_depth:
+        #     depth_gt = self.get_depth(folder, frame_index, side, do_flip)
+        #     inputs["depth_gt"] = np.expand_dims(depth_gt, 0)
+        #     inputs["depth_gt"] = torch.from_numpy(inputs["depth_gt"].astype(np.float32))
 
         if self.load_depth:
             depth_gt = self.get_depth(folder, frame_index, side, do_flip)
@@ -228,4 +236,6 @@ class MonoDataset(data.Dataset):
     def get_depth_vk(self, folder, frame_index, side, do_flip):
         raise NotImplementedError
     def get_depth(self, folder, frame_index, side, do_flip):
+        raise NotImplementedError
+    def get_mask(self, folder, frame_index, side, do_flip):
         raise NotImplementedError

@@ -150,6 +150,7 @@ def evaluate(opt):
     pred_Js = []
     input_colors = []
     gt_depths = []
+    sky_masks=[]
     print('-->Using\n cuda') if torch.cuda.is_available() else print('-->Using\n CPU')
     print("-> Computing predictions with size {}x{}".format(
         encoder_dict['width'], encoder_dict['height']))
@@ -181,6 +182,10 @@ def evaluate(opt):
                 N = pred_disp.shape[0] // 2
                 pred_disp = batch_post_process_disparity(pred_disp[:N], pred_disp[N:, :, ::-1])
 
+            if opt.eval_sky:
+                sky_mask = toNumpy(data['inputMask'].to(device).cpu(), keepDim=True)
+                sky_masks.append(sky_mask)
+
             pred_disps.append(pred_disp)
             input_colors.append(toNumpy(input_color.cpu(), keepDim=True))
             gt_depths.append((gt.cpu()))
@@ -194,7 +199,9 @@ def evaluate(opt):
     gt_depths = np.concatenate(gt_depths)
     if opt.use_recons_net:
         pred_Js = np.concatenate(pred_Js)
-  
+    if opt.eval_sky:
+        sky_masks = np.concatenate(sky_masks)
+ 
     
     
     save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions"+opt.model_name)
@@ -283,8 +290,9 @@ def evaluate(opt):
             inGTMask = inGTMask.astype(np.uint8)
             kernel = np.ones((5, 5), 'uint8')       
             inGTMask = cv2.dilate(inGTMask, kernel, iterations=1)
-            inGTMask = 255- inGTMask
-            sky_mask = find_sky_mask(color, inGTMask)
+            inGTMask = np.expand_dims(255- inGTMask,0)
+            sky_mask = (np.sum(sky_masks[i],3)/3*255).astype(np.uint8)
+            sky_mask[inGTMask<255]=0
             if np.any(sky_mask):
                 maxDepth = np.max(gt_depths[i])
                 height, width = sky_mask.shape[:2]
@@ -296,7 +304,6 @@ def evaluate(opt):
                 sky_err = np.mean(sky_abs_err)
                 plt.imsave(save_dir + "/frame_{:06d}_sky_mask.bmp".format(i), sky_mask)
                 sky_errs+=sky_err
-                # print(sky_abs_err)
 
 
         cmap = plt.cm.jet

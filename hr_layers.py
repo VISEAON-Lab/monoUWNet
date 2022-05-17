@@ -449,8 +449,8 @@ class Attention_Module(nn.Module):
             out_channel = output_channel
         channel = in_channel
         self.ca = ChannelAttention(channel)
-        #self.sa = SpatialAttention()
-        #self.cs = CS_Block(channel)
+        # self.sa = SpatialAttention()
+        # self.cs = CS_Block(channel)
         self.conv_se = nn.Conv2d(in_channels = in_channel, out_channels = out_channel, kernel_size = 3, stride = 1, padding = 1 )
         self.relu = nn.ReLU(inplace = True)
 
@@ -461,8 +461,8 @@ class Attention_Module(nn.Module):
         features = torch.cat(features, 1)
 
         features = self.ca(features)
-        #features = self.sa(features)
-        #features = self.cs(features)
+        # features = self.sa(features)
+        # features = self.cs(features)
         
         return self.relu(self.conv_se(features))
 

@@ -1,1 +1,1 @@
-python test_sample.py --image_path /home/samitai/Work/myDIFFNet/kitti_data --model_folder /home/samitai/Work/myDIFFNet/models/mono_model/models/weights_last --model_name kitti
+python test_sample.py --image_path /Users/shlomiamitai/work/myRepo/ANSFL/monocularDepthNN/kitti_data --model_folder /Users/shlomiamitai/work/myRepo/ANSFL/monocularDepthNN/myDIFFNet/models/mono_model/models/weights_last --model_name kitti

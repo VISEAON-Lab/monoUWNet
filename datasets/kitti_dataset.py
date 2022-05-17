@@ -87,11 +87,24 @@ class KITTIRAWDataset(KITTIDataset):
         depth_gt = generate_depth_map(calib_path, velo_filename, self.side_map[side])
         depth_gt = skimage.transform.resize(
             depth_gt, self.full_res_shape[::-1], order=0, preserve_range=True, mode='constant')
+        
+        return depth_gt
+
+    def get_mask(self, folder, frame_index, side, do_flip):
+        mask_filename = os.path.join(
+            self.data_path,
+            folder,
+            "image_0{}/data/{:010d}skyMask.png".format(self.side_map[side], int(frame_index)))
+
+        mask = self.loader(mask_filename)
+        # mask = skimage.transform.resize(
+        #     mask, self.full_res_shape[::-1], order=0, preserve_range=True, mode='constant')
+
 
         if do_flip:
-            depth_gt = np.fliplr(depth_gt)
+            mask = np.fliplr(mask)
 
-        return depth_gt
+        return mask
 
 
 class KITTIOdomDataset(KITTIDataset):
