@@ -515,12 +515,18 @@ class Trainer:
         if self.opt.use_lvw:
             self.lv = LocalVariation(k_size=25)
             lv = normalize_image(self.lv(pred, target).mean(1, True))
-            reprojection_loss*=lv
+            if self.opt.load_weights_folder is not None:
+                dweight = normalize_image(mask)
+                total_rloss = reprojection_loss*lv*(1-dweight) + reprojection_loss*dweight
+                
+            else:
+                total_rloss = reprojection_loss*lv
+            
         # if mask is not None:
         #     reprojection_loss[mask<1e-3]=0
         #     reprojection_loss[mask>15]=0
 
-        return reprojection_loss
+        return total_rloss
 
     def computeGWLoss(self, img):
         globalMu = torch.mean(img.view(img.shape[0], -1), dim=1)
