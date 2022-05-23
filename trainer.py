@@ -515,7 +515,7 @@ class Trainer:
         if self.opt.use_lvw:
             self.lv = LocalVariation(k_size=25)
             lv = normalize_image(self.lv(pred, target).mean(1, True))
-            if self.opt.load_weights_folder is not None:
+            if self.opt.load_weights_folder is not None or self.epoch > 5:
                 dweight = normalize_image(mask)
                 total_rloss = reprojection_loss*lv*(1-dweight) + reprojection_loss*dweight
                 
