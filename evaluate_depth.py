@@ -290,8 +290,9 @@ def evaluate(opt):
             inGTMask = inGTMask.astype(np.uint8)
             kernel = np.ones((5, 5), 'uint8')       
             inGTMask = cv2.dilate(inGTMask, kernel, iterations=1)
-            inGTMask = np.expand_dims(255- inGTMask,0)
-            sky_mask = (np.sum(sky_masks[i],3)/3*255).astype(np.uint8)
+            inGTMask = 255- inGTMask
+            sky_mask = np.squeeze(sky_masks[i])
+            sky_mask = (np.sum(sky_mask,2)/3*255).astype(np.uint8)
             sky_mask[inGTMask<255]=0
             if np.any(sky_mask):
                 maxDepth = np.max(gt_depths[i])
@@ -299,9 +300,10 @@ def evaluate(opt):
                 pred_depth = 1 / pred_disp
                 pred_depth *= ratio
                 pred_depth = cv2.resize(pred_depth, (width, height))
-                sky_abs_err = (maxDepth - pred_depth[sky_mask>0])
+                sky_abs_err = 1/(pred_depth[sky_mask>0])
                 sky_abs_err[sky_abs_err<0] = 0
                 sky_err = np.mean(sky_abs_err)
+                # print(sky_err)
                 plt.imsave(save_dir + "/frame_{:06d}_sky_mask.bmp".format(i), sky_mask)
                 sky_errs+=sky_err
 
@@ -384,6 +386,7 @@ def evaluate(opt):
             "a3": np.round(mean_errors[6],3),
             "sky_err": np.round(sky_errs,3)
             }
+        print(f"skyError: {sky_errs}")
     writer.writerow(resdict.keys())
     writer.writerow(resdict.values())
 
