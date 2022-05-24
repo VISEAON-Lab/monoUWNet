@@ -389,9 +389,9 @@ def evaluate(opt):
             "sky_err": np.round(sky_errs,3)
             }
         print(f"skyError: {sky_errs}")
-        with open("skyErrs.txt", 'w') as f:
-            for s in skyErrList:
-                f.write(str(s) + '\n')
+        # with open("skyErrs_kitti.txt", 'w') as f:
+        #     for s in skyErrList:
+        #         f.write(str(s) + '\n')
 
     writer.writerow(resdict.keys())
     writer.writerow(resdict.values())
