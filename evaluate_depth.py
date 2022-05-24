@@ -222,6 +222,7 @@ def evaluate(opt):
 
     if opt.eval_sky:
         sky_errs=0
+        skyErrList = []
     errors = []
     ratios = []
     plt.set_cmap('jet')  
@@ -283,7 +284,7 @@ def evaluate(opt):
         plt.imsave(save_dir + "/frame_{:06d}_gt.bmp".format(i), inGT)
 
         color = (inputColor*255).astype(np.uint8)
-        skyErrList = []
+
         if opt.eval_sky:
             inGTMask = cv2.resize(inGT, (outPred.shape[1], outPred.shape[0]))
             inGTMask[inGTMask>0]=255
