@@ -283,7 +283,7 @@ def evaluate(opt):
         plt.imsave(save_dir + "/frame_{:06d}_gt.bmp".format(i), inGT)
 
         color = (inputColor*255).astype(np.uint8)
-
+        skyErrList = []
         if opt.eval_sky:
             inGTMask = cv2.resize(inGT, (outPred.shape[1], outPred.shape[0]))
             inGTMask[inGTMask>0]=255
@@ -306,6 +306,7 @@ def evaluate(opt):
                 # print(sky_err)
                 plt.imsave(save_dir + "/frame_{:06d}_sky_mask.bmp".format(i), sky_mask)
                 sky_errs+=sky_err
+                skyErrList.append(sky_err)
 
 
         cmap = plt.cm.jet
@@ -387,6 +388,10 @@ def evaluate(opt):
             "sky_err": np.round(sky_errs,3)
             }
         print(f"skyError: {sky_errs}")
+        with open("skyErrs.txt", 'w') as f:
+            for s in skyErrList:
+                f.write(str(s) + '\n')
+
     writer.writerow(resdict.keys())
     writer.writerow(resdict.values())
 
