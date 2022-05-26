@@ -134,3 +134,21 @@ class UCanyonDataset(MonoDataset):
         return depth_gt 
         
 
+    def get_mask(self, folder, frame_index, side, do_flip):
+        idx, frameName = folder.split(',')
+        idx = int(idx)
+        try:
+            frameName = self.filenames[idx+frame_index].split(',')[1]
+        except:
+            frameName = self.filenames[idx].split(',')[1]
+        f_str = frameName
+        f_str = f_str[:-5]+'_skyMask.png'
+        mask_filename = os.path.join(
+            self.data_path, 'imgs',
+            f_str)
+        mask = self.loader(mask_filename)
+        if do_flip:
+            mask = np.fliplr(mask)
+
+        return mask
+
