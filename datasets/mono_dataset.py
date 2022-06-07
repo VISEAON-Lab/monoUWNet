@@ -95,7 +95,9 @@ class MonoDataset(data.Dataset):
             self.use_preEst_depth = opts.use_preEst_depth
             self.load_depth = opts.use_depth
             self.use_hf = opts.use_homomorphic_filt
+            self.do_flip = opts.do_flip
         else:
+            self.do_flip=True
             self.load_depth = self.check_depth()
 
     def preprocess(self, inputs, color_aug):
@@ -149,7 +151,7 @@ class MonoDataset(data.Dataset):
         inputs = {}
         
         do_color_aug = self.is_train and random.random() > 0.5
-        do_flip = self.is_train and random.random() > 0.5
+        do_flip = self.do_flip and self.is_train and random.random() > 0.5
 
         line = self.filenames[index].split()
         folder = line[0]

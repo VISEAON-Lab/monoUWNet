@@ -6,7 +6,7 @@ from six.moves import urllib
 import numpy as np
 import cv2
 from my_utils import toNumpy
-
+import random
 
 class HomomorphicFilter:
     """Homomorphic filter implemented with diferents filters and an option to an external filter.
@@ -262,9 +262,13 @@ def homorphicFiltering(img, G=None):
     # result = result.astype(np.float32)
     # rgb = np.dstack((result,cr,cb)) 
 
-    homo_filter = HomomorphicFilter(a = 0.75, b = 1.25)
+    # homo_filter = HomomorphicFilter(a = 0.75, b = 1.25)
     homo_filter = HomomorphicFilter()
-    img_filtered = homo_filter.filter(I=y, filter_params=[10,2]).astype(np.float32)
+    filter_params=[5,2]
+    # random HF!!
+    x = random.randrange(0,10)
+    filter_params[0] = x
+    img_filtered = homo_filter.filter(I=y, filter_params=filter_params).astype(np.float32)
 
 
     rgb = np.dstack((img_filtered,cr,cb)) 

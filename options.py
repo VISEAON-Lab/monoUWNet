@@ -79,6 +79,9 @@ class MonodepthOptions:
         self.parser.add_argument("--use_homomorphic_filt",
                                  help="if set, uses homomorphic_filt for training",
                                  action="store_true")
+        self.parser.add_argument("--do_flip",
+                                 help="if set, do image flip during training",
+                                 action="store_true")
         self.parser.add_argument("--use_depth",
                                  help="if set, uses depth GT for training",
                                  action="store_true")
