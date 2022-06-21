@@ -59,7 +59,7 @@ class UCanyonDataset(MonoDataset):
         # return os.path.isfile(img_filename)
         return False
 
-    def get_color(self, folder, frame_index, side, do_flip):
+    def get_color(self, folder, frame_index, side, do_flip, x_hf=None):
         color_path = self.get_image_path(folder, frame_index, side)
         color = self.loader(color_path)
         K = self.K[:3, :3].copy()
@@ -82,7 +82,7 @@ class UCanyonDataset(MonoDataset):
             G = None
             #     # if os.path.isfile(os.path.join(self.data_path, "G.npy")):
             #     #     G = np.load(os.path.join(self.data_path, "G.npy"))
-            hf_color = pil.fromarray(homorphicFiltering(color, G))
+            hf_color = pil.fromarray(homorphicFiltering(color, G, x_hf))
             #     hf_color.save(color_hf_path)
             # else:
             #     hf_color = self.loader(color_hf_path)

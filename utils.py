@@ -31,7 +31,7 @@ class HomomorphicFilter:
         Q = I_shape[1]/2
         U, V = np.meshgrid(range(I_shape[0]), range(I_shape[1]), sparse=False, indexing='ij')
         Duv = (((U-P)**2+(V-Q)**2)).astype(float)
-        H = 1/(1+(Duv/filter_params[0]**2)**filter_params[1])
+        H = 1/(1+(Duv/(filter_params[0]+1e-3)**2)**filter_params[1])
         return (1 - H)
 
     def __gaussian_filter(self, I_shape, filter_params):
@@ -231,7 +231,7 @@ def computeJ(image, depth):
     J = (img - A) / TM + A
     return J # TODO: convert back to pytorch
 
-def homorphicFiltering(img, G=None):
+def homorphicFiltering(img, G=None, x=None):
     img = np.float32(img)
     img = img/255
 
@@ -242,14 +242,14 @@ def homorphicFiltering(img, G=None):
     imgYCrCb = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
     y,cr,cb = cv2.split(imgYCrCb)
 
-    y_log = np.log(y+0.01)
+    # y_log = np.log(y+0.01)
 
-    y_fft = np.fft.fft2(y_log)
+    # y_fft = np.fft.fft2(y_log)
 
-    y_fft_shift = np.fft.fftshift(y_fft)
+    # y_fft_shift = np.fft.fftshift(y_fft)
 
 
-    DX = cols/cutoff
+    # DX = cols/cutoff
     # if G is None:
     #     G = np.ones((rows,cols))
     #     for i in range(rows):
@@ -266,7 +266,8 @@ def homorphicFiltering(img, G=None):
     homo_filter = HomomorphicFilter()
     filter_params=[5,2]
     # random HF!!
-    x = random.randrange(0,10)
+    if x is None:
+        x = random.randrange(0,10)
     filter_params[0] = x
     img_filtered = homo_filter.filter(I=y, filter_params=filter_params).astype(np.float32)
 

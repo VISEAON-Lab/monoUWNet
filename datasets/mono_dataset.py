@@ -166,12 +166,13 @@ class MonoDataset(data.Dataset):
         else:
             side = None
 
+        x = random.randrange(0,10)
         for i in self.frame_idxs:
             if i == "s":
                 other_side = {"r": "l", "l": "r"}[side]
                 inputs[("color", i, -1)] = self.get_color(folder, frame_index, other_side, do_flip)
             else:
-                inputs[("color", i, -1)] = self.get_color(folder, frame_index + i, side, do_flip)
+                inputs[("color", i, -1)] = self.get_color(folder, frame_index + i, side, do_flip, x_hf=x)
                 # change color sapce
 
         if self.dataName != 'kitti': # sc/uc/flatiron
