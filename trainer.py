@@ -653,7 +653,7 @@ class Trainer:
         if self.opt.use_recons_net:
         # GW loss
             w=0
-            if self.epoch>20:
+            if self.epoch>5:
                 w=1e-4
             if self.epoch>25:
                 w=1
