@@ -128,7 +128,7 @@ class UCanyonDataset(MonoDataset):
                 depth_gt = pil.open(depth_path)
             except:
                 return None
-            return None
+
         depth_gt = depth_gt.resize(self.full_res_shape, pil.NEAREST)
         depth_gt = np.array(depth_gt).astype(np.float32)
         # depth_gt = preProcessDepth(depth_gt)
