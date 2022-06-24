@@ -188,7 +188,7 @@ def evaluate(opt):
 
             pred_disps.append(pred_disp)
             input_colors.append(toNumpy(input_color.cpu(), keepDim=True))
-            gt_depths.append((toNumpy(gt.cpu())))
+            gt_depths.append((gt.cpu()))
 
         # end_time = time.time()
         # inferring = end_time - init_time
