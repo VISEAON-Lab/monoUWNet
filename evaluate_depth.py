@@ -154,7 +154,8 @@ def evaluate(opt):
     print('-->Using\n cuda') if torch.cuda.is_available() else print('-->Using\n CPU')
     print("-> Computing predictions with size {}x{}".format(
         encoder_dict['width'], encoder_dict['height']))
-
+    cmap = plt.get_cmap('jet')
+    colors = cmap(np.linspace(0, 1.0, 152))
     with torch.no_grad():
         # init_time = time.time()
         i = 0 
@@ -189,6 +190,23 @@ def evaluate(opt):
             pred_disps.append(pred_disp)
             input_colors.append(toNumpy(input_color.cpu(), keepDim=True))
             gt_depths.append((gt.cpu()))
+
+            BG_R = torch.max(input_color[:,1:, :,:], dim=1, keepdim=True)[0] - torch.unsqueeze(input_color[:,0,:,:], dim=1)
+            b = toNumpy(BG_R).flatten()
+            d = toNumpy(depth).flatten()
+            import torch.nn.functional as fn
+            out = fn.interpolate(gt, size=(480, 640), mode='nearest')
+            g = toNumpy(out).flatten()
+            gc = g[g>0]; bc = b[g>0]; dc = d[g>0]
+            ds = 10000
+            for ptt in range(1, gc.shape[0], ds):
+                plt.plot(dc[ptt], bc[ptt], '.',color=colors[i,:])
+                plt.pause(0.05)
+
+        plt.show()
+        plt.xlabel("estimated depth points")
+        plt.ylabel("ULAP")
+        plt.savefig('ulap2EstimatedDepthPlot.png')
 
         # end_time = time.time()
         # inferring = end_time - init_time
