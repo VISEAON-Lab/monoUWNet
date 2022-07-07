@@ -522,7 +522,7 @@ class Trainer:
                 
             else:
                 total_rloss = reprojection_loss*lv
-            
+                
         # if mask is not None:
         #     reprojection_loss[mask<1e-3]=0
         #     reprojection_loss[mask>15]=0

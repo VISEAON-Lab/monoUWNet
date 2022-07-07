@@ -162,6 +162,8 @@ def evaluate(opt):
             i += 1  
             input_color = data[("color", 0, 0)].to(device)
             gt = data[("depth_gt")].to(device)   
+            if torch.count_nonzero(gt) == 0:
+                continue
             if opt.post_process:
                 # Post-processed results require each image to have two forward passes
                 input_color = torch.cat((input_color, torch.flip(input_color, [3])), 0)
@@ -269,6 +271,9 @@ def evaluate(opt):
         inGT = (normalize_numpy(gt_depths[i])*255).astype(np.uint8)
         inGT = np.squeeze(inGT)
         inputColor = input_colors[i]
+        inDisp = gt_depths[i].copy()
+        inDisp[inDisp>0] = 1 / inDisp[inDisp>0]
+        inDisp = np.squeeze(normalize_numpy(inDisp)*255).astype(np.uint8)
         # depth = 32.779243 / disp_resized
         # depth = np.clip(depth, 0, 80)/10
         # depth = np.uint8(depth * 256)
@@ -280,8 +285,10 @@ def evaluate(opt):
             plt.imsave(save_dir + "/frame_{:06d}_color_recons.jpg".format(i), J)
 
         plt.imsave(save_dir + "/frame_{:06d}_color.jpg".format(i), inputColor)
-        plt.imsave(save_dir + "/frame_{:06d}_disp.bmp".format(i), outPred)
-        plt.imsave(save_dir + "/frame_{:06d}_gt.bmp".format(i), inGT)
+        plt.imsave(save_dir + "/frame_{:06d}_disp.png".format(i), outPred)
+        plt.imsave(save_dir + "/frame_{:06d}_gt.png".format(i), inGT)
+        plt.imsave(save_dir + "/frame_{:06d}_inDisp.png".format(i), inDisp)
+        plt.imsave(save_dir + "/frame_{:06d}_outDepth.png".format(i), outDepth)
 
         color = (inputColor*255).astype(np.uint8)
 

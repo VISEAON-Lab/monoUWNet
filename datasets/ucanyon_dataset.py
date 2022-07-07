@@ -73,7 +73,7 @@ class UCanyonDataset(MonoDataset):
         if do_flip:
             color = color.transpose(pil.FLIP_LEFT_RIGHT)
 
-        if self.use_hf:
+        if self.use_hf and x_hf!=-1:
             # hf_path = os.path.join(self.data_path, 'imgs_hf')
             # if not os.path.exists(hf_path):
             #     os.makedirs(hf_path)
@@ -151,7 +151,11 @@ class UCanyonDataset(MonoDataset):
         mask_filename = os.path.join(
             self.data_path, 'imgs',
             f_str)
-        mask = self.loader(mask_filename)
+        try:
+            mask = self.loader(mask_filename)
+        except:
+            mask = pil.new(mode = "RGB", size = (self.full_res_shape[0], self.full_res_shape[1]),
+                           color = (0, 0, 0))
         if do_flip:
             mask = np.fliplr(mask)
 
