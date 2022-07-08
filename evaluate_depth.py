@@ -154,10 +154,15 @@ def evaluate(opt):
     print('-->Using\n cuda') if torch.cuda.is_available() else print('-->Using\n CPU')
     print("-> Computing predictions with size {}x{}".format(
         encoder_dict['width'], encoder_dict['height']))
+    
+    save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions"+opt.model_name)
+    print("-> Saving out benchmark predictions to {}".format(save_dir))
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    
     saveFig=True
     if saveFig:
         fig = plt.figure()
-        save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions"+opt.model_name)
 
     with torch.no_grad():
         # init_time = time.time()
@@ -231,10 +236,10 @@ def evaluate(opt):
  
     
     
-    save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions"+opt.model_name)
-    print("-> Saving out benchmark predictions to {}".format(save_dir))
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+    # save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions"+opt.model_name)
+    # print("-> Saving out benchmark predictions to {}".format(save_dir))
+    # if not os.path.exists(save_dir):
+    #     os.makedirs(save_dir)
 
  
     output_path = os.path.join(
