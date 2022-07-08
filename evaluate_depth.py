@@ -154,6 +154,10 @@ def evaluate(opt):
     print('-->Using\n cuda') if torch.cuda.is_available() else print('-->Using\n CPU')
     print("-> Computing predictions with size {}x{}".format(
         encoder_dict['width'], encoder_dict['height']))
+    saveFig=True
+    if saveFig:
+        fig = plt.figure()
+        save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions"+opt.model_name)
 
     with torch.no_grad():
         # init_time = time.time()
@@ -191,6 +195,27 @@ def evaluate(opt):
             pred_disps.append(pred_disp)
             input_colors.append(toNumpy(input_color.cpu(), keepDim=True))
             gt_depths.append((gt.cpu()))
+            
+            if saveFig:
+                BG_R = torch.max(input_color[:,1:, :,:], dim=1, keepdim=True)[0] - torch.unsqueeze(input_color[:,0,:,:], dim=1)
+                b = toNumpy(BG_R).flatten()
+                d = toNumpy(depth).flatten()
+                import torch.nn.functional as fn
+                out = fn.interpolate(gt, size=(480, 640), mode='nearest')
+                g = toNumpy(out).flatten()
+                gc = g[g>0]; bc = b[g>0]/2; dc = d[g>0]*4
+                ds = 10000
+                for ptt in range(1, gc.shape[0], ds):
+                    if dc[ptt]<8 and gc[ptt]<8:
+                        plt.plot(dc[ptt], bc[ptt], '.',color='r')
+                        plt.plot(gc[ptt], bc[ptt], '.',color='b')
+                        # plt.pause(0.05)
+
+        if saveFig:
+            plt.xlabel("Estimated depth points")
+            plt.ylabel("ULAP")
+            # plt.show()
+            fig.savefig(save_dir + '/ulap2GTDepthPlot.png')
 
         # end_time = time.time()
         # inferring = end_time - init_time
