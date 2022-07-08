@@ -87,6 +87,12 @@ class UCanyonDataset(MonoDataset):
             # else:
             #     hf_color = self.loader(color_hf_path)
             
+            if 0:
+                color.save('rhf_'+str(0)+'.png')
+                for d0 in range(10, 250, 10):
+                    hf_color = pil.fromarray(homorphicFiltering(color, G, d0))
+                    hf_color.save('rhf_'+str(d0)+'.png')
+
             return hf_color
         return color
 

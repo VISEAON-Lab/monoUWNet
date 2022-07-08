@@ -208,7 +208,7 @@ def evaluate(opt):
                 import torch.nn.functional as fn
                 out = fn.interpolate(gt, size=(480, 640), mode='nearest')
                 g = toNumpy(out).flatten()
-                gc = g[g>0]; bc = b[g>0]/2; dc = d[g>0]*4
+                gc = g[g>0]; bc = b[g>0]/4; dc = d[g>0]*4
                 ds = 10000
                 for ptt in range(1, gc.shape[0], ds):
                     if dc[ptt]<8 and gc[ptt]<8:
