@@ -501,6 +501,7 @@ class Trainer:
         # mask3 = mask.expand(mask.shape[0], 3, mask.shape[2], mask.shape[3])
         abs_diff = torch.abs(target - pred)
         l1_loss = abs_diff.mean(1, True)
+        
        
         if self.opt.no_ssim:
             reprojection_loss = l1_loss
