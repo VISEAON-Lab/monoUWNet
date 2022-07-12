@@ -217,7 +217,10 @@ def evaluate(opt):
                         # plt.pause(0.05)
 
         if saveFig:
-            plt.xlabel("Estimated depth points")
+            plt.plot(dc[ptt], bc[ptt], '.',color='r', label="predicted depth")
+            plt.plot(gc[ptt], bc[ptt], '.',color='b', label="ground truth")
+            plt.legend(loc="lower right")
+            plt.xlabel("Depth Points")
             plt.ylabel("ULAP")
             # plt.show()
             fig.savefig(save_dir + '/ulap2GTDepthPlot.png')

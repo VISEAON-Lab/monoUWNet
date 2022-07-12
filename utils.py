@@ -232,6 +232,7 @@ def computeJ(image, depth):
     return J # TODO: convert back to pytorch
 
 def homorphicFiltering(img, G=None, x=None):
+
     img = np.float32(img)
     img = img/255
 
@@ -267,7 +268,8 @@ def homorphicFiltering(img, G=None, x=None):
     filter_params=[5,2]
     # random HF!!
     if x is None:
-        x = random.randrange(50,500)
+        x = random.randrange(1,50)*5
+
     filter_params[0] = x
     img_filtered = homo_filter.filter(I=y, filter_params=filter_params).astype(np.float32)
 

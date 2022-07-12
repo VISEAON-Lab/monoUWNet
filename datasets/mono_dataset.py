@@ -166,7 +166,7 @@ class MonoDataset(data.Dataset):
         else:
             side = None
 
-        x = random.randrange(0,25)*10
+        x = random.randrange(0,5)*40
         if x==0:
             x=-1
         for i in self.frame_idxs:
