@@ -46,13 +46,13 @@ class SCDataset(MonoDataset):
         # return os.path.isfile(img_filename)
         return False
 
-    def get_color(self, folder, frame_index, side, do_flip):
+    def get_color(self, folder, frame_index, side, do_flip, x_hf=None):
         color_path = self.get_image_path(folder, frame_index, side)
         color = self.loader(color_path)
         if do_flip:
             color = color.transpose(pil.FLIP_LEFT_RIGHT)
         
-        if self.use_hf:
+        if self.use_hf and x_hf!=-1:
             # hf_path = os.path.join(self.data_path, 'imgs_hf')
             # if not os.path.exists(hf_path):
             #     os.makedirs(hf_path)
@@ -61,7 +61,7 @@ class SCDataset(MonoDataset):
             G = None
             #     if os.path.isfile(os.path.join(self.data_path, "G.npy")):
             #         G = np.load(os.path.join(self.data_path, "G.npy"))
-            hf_color = pil.fromarray(homorphicFiltering(color, G))
+            hf_color = pil.fromarray(homorphicFiltering(color, G, x_hf))
             #     # hf_color.save(color_hf_path)
             # else:
             #     hf_color = self.loader(color_hf_path)
