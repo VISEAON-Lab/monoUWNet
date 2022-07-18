@@ -266,6 +266,7 @@ def evaluate(opt):
     for i in tobe_cleaned:
         if i in cleaned:
             cleaned.remove(i)
+    sky_count=0
     for i in range(pred_disps.shape[0]):
 
         gt_depth = gt_depths[i]
@@ -336,13 +337,18 @@ def evaluate(opt):
             sky_mask = (np.sum(sky_mask,2)/3*255).astype(np.uint8)
             sky_mask[inGTMask<255]=0
             if np.any(sky_mask):
+                sky_count+=1
                 maxDepth = np.max(gt_depths[i])
                 height, width = sky_mask.shape[:2]
-                pred_depth = 1 / pred_disp
-                pred_depth *= ratio
-                pred_depth = cv2.resize(pred_depth, (width, height))
-                sky_abs_err = 1/(pred_depth[sky_mask>0])
-                sky_abs_err[sky_abs_err<0] = 0
+                # pred_depth = 1 / pred_disp
+                # pred_depth *= ratio
+                # pred_depth = cv2.resize(pred_depth, (width, height))
+                # sky_abs_err = 1/(pred_depth[sky_mask>0])
+                
+                pred_disp_sc = cv2.resize(pred_disp, (width, height))
+                sky_abs_err = pred_disp_sc[sky_mask>0]
+
+                sky_abs_err = sky_abs_err[sky_abs_err>=0]
                 sky_err = np.mean(sky_abs_err)
                 # print(sky_err)
                 plt.imsave(save_dir + "/frame_{:06d}_sky_mask.bmp".format(i), sky_mask)
@@ -417,6 +423,7 @@ def evaluate(opt):
         }
 
     if opt.eval_sky:
+        sky_errs/=sky_count
         resdict = {
             "time": time,
             "abs_rel": np.round(mean_errors[0],3),

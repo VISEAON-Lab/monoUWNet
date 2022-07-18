@@ -23,7 +23,7 @@ runs = ['', 'corrLoss_', 'lvw_', 'rhf_', 'all_', 'all_wo_corrLoss_', 'all_wo_lvw
 # runs = ['', 'corrLoss_', 'lvw_', 'rhf_', 'all_', 'all_wo_corrLoss_', 'all_wo_lvw_']
 fullnameRuns = [run_name + i+dname for i in runs]
 run1Name = fullnameRuns[0]
-data_sets = ['_uc', '_flatiron', '_tiny']
+data_sets = ['_uc']#, '_flatiron', '_tiny']
 for data in data_sets:
 # data='_uc'
 # data=''
