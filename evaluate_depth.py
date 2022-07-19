@@ -168,6 +168,7 @@ def evaluate(opt):
     # corr_loss = CorrelationLoss()
     tot_corr_gt2pred=0
     tot_corr_gt2ulap=0
+    tot_corr_pred2ulap=0
     with torch.no_grad():
         # init_time = time.time()
         i = 0 
@@ -219,8 +220,10 @@ def evaluate(opt):
                 from scipy import stats
                 corr_gt2pred = stats.pearsonr(gc, dc)
                 corr_gt2ulap = stats.pearsonr(gc, bc)
+                corr_pred2ulap = stats.pearsonr(dc, bc)
                 tot_corr_gt2pred+=corr_gt2pred[0]
                 tot_corr_gt2ulap+=corr_gt2ulap[0]
+                tot_corr_pred2ulap+=corr_pred2ulap[0]
                 for ptt in range(1, gc.shape[0], ds):
                     if dc[ptt]<8 and gc[ptt]<8:
                         plt.plot(dc[ptt], bc[ptt], '.',color='r')
@@ -250,6 +253,7 @@ def evaluate(opt):
  
     tot_corr_gt2pred/=i
     tot_corr_gt2ulap/=i
+    tot_corr_pred2ulap/=i
 
     # save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions"+opt.model_name)
     # print("-> Saving out benchmark predictions to {}".format(save_dir))
@@ -433,7 +437,8 @@ def evaluate(opt):
         "a2": np.round(mean_errors[5],3),
         "a3": np.round(mean_errors[6],3),
         "tot_corr_gt2pred": np.round(tot_corr_gt2pred,3),
-        "tot_corr_gt2ulap": np.round(tot_corr_gt2ulap,3)
+        "tot_corr_gt2ulap": np.round(tot_corr_gt2ulap,3),
+        "tot_corr_pred2ulap": np.round(tot_corr_pred2ulap,3)
         }
 
     if opt.eval_sky:
@@ -449,7 +454,8 @@ def evaluate(opt):
             "a3": np.round(mean_errors[6],3),
             "sky_err": np.round(sky_errs,3),
             "tot_corr_gt2pred": np.round(tot_corr_gt2pred,3),
-            "tot_corr_gt2ulap": np.round(tot_corr_gt2ulap,3)
+            "tot_corr_gt2ulap": np.round(tot_corr_gt2ulap,3),
+            "tot_corr_pred2ulap": np.round(tot_corr_pred2ulap,3)
             }
         print(f"skyError: {sky_errs}")
         # with open("skyErrs_kitti.txt", 'w') as f:
