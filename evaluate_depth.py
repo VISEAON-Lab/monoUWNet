@@ -7,6 +7,7 @@ import time
 import torch
 from torch.utils.data import DataLoader
 from  torchvision.utils import save_image
+import torch.nn.functional as fn
 from layers import disp_to_depth
 from utils import readlines, sec_to_hm_str, estimateA, water_types_Nrer_rgb
 from options import MonodepthOptions
@@ -18,7 +19,7 @@ from my_utils import *
 import csv
 from datetime import datetime 
 from skyPixelSegmentation import find_sky_mask
-
+from layers import CorrelationLoss
 cv2.setNumThreads(0)  # This speeds up evaluation 5x on our unix systems (OpenCV 3.3.1)
 
 
@@ -164,6 +165,9 @@ def evaluate(opt):
     if saveFig:
         fig = plt.figure()
 
+    # corr_loss = CorrelationLoss()
+    tot_corr_gt2pred=0
+    tot_corr_gt2ulap=0
     with torch.no_grad():
         # init_time = time.time()
         i = 0 
@@ -197,6 +201,9 @@ def evaluate(opt):
                 sky_mask = toNumpy(data['inputMask'].to(device).cpu(), keepDim=True)
                 sky_masks.append(sky_mask)
 
+            # gt_rsz = fn.interpolate(gt, size=(480, 640), mode='nearest')
+            # corrLoss = 1 - corr_loss(input_color, gt_rsz, depth)
+
             pred_disps.append(pred_disp)
             input_colors.append(toNumpy(input_color.cpu(), keepDim=True))
             gt_depths.append((gt.cpu()))
@@ -205,11 +212,15 @@ def evaluate(opt):
                 BG_R = torch.max(input_color[:,1:, :,:], dim=1, keepdim=True)[0] - torch.unsqueeze(input_color[:,0,:,:], dim=1)
                 b = toNumpy(BG_R).flatten()
                 d = toNumpy(depth).flatten()
-                import torch.nn.functional as fn
-                out = fn.interpolate(gt, size=(480, 640), mode='nearest')
-                g = toNumpy(out).flatten()
+                gt_rsz = fn.interpolate(gt, size=(480, 640), mode='nearest')
+                g = toNumpy(gt_rsz).flatten() # gc = gt; dc = pred; bc = bgr
                 gc = g[g>0]; bc = b[g>0]/4; dc = d[g>0]*4
-                ds = 10000
+                ds = 5000
+                from scipy import stats
+                corr_gt2pred = stats.pearsonr(gc, dc)
+                corr_gt2ulap = stats.pearsonr(gc, bc)
+                tot_corr_gt2pred+=corr_gt2pred[0]
+                tot_corr_gt2ulap+=corr_gt2ulap[0]
                 for ptt in range(1, gc.shape[0], ds):
                     if dc[ptt]<8 and gc[ptt]<8:
                         plt.plot(dc[ptt], bc[ptt], '.',color='r')
@@ -237,8 +248,9 @@ def evaluate(opt):
     if opt.eval_sky:
         sky_masks = np.concatenate(sky_masks)
  
-    
-    
+    tot_corr_gt2pred/=i
+    tot_corr_gt2ulap/=i
+
     # save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions"+opt.model_name)
     # print("-> Saving out benchmark predictions to {}".format(save_dir))
     # if not os.path.exists(save_dir):
@@ -420,6 +432,8 @@ def evaluate(opt):
         "a1": np.round(mean_errors[4],3),
         "a2": np.round(mean_errors[5],3),
         "a3": np.round(mean_errors[6],3),
+        "tot_corr_gt2pred": np.round(tot_corr_gt2pred,3),
+        "tot_corr_gt2ulap": np.round(tot_corr_gt2ulap,3)
         }
 
     if opt.eval_sky:
@@ -433,7 +447,9 @@ def evaluate(opt):
             "a1": np.round(mean_errors[4],3),
             "a2": np.round(mean_errors[5],3),
             "a3": np.round(mean_errors[6],3),
-            "sky_err": np.round(sky_errs,3)
+            "sky_err": np.round(sky_errs,3),
+            "tot_corr_gt2pred": np.round(tot_corr_gt2pred,3),
+            "tot_corr_gt2ulap": np.round(tot_corr_gt2ulap,3)
             }
         print(f"skyError: {sky_errs}")
         # with open("skyErrs_kitti.txt", 'w') as f:
