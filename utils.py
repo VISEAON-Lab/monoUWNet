@@ -272,8 +272,12 @@ def homorphicFiltering(img, G=None, x=None):
 
     filter_params[0] = x
     img_filtered = homo_filter.filter(I=y, filter_params=filter_params).astype(np.float32)
-
-
+    y_max = np.max(y)
+    y_min = np.min(y)
+    img_filtered_max = np.max(img_filtered)
+    img_filtered_min = np.min(img_filtered)
+    z = (img_filtered - img_filtered_min) / (img_filtered_max - img_filtered_min)
+    z = z*(y_max - y_min) + y_min
     rgb = np.dstack((img_filtered,cr,cb)) 
     rgb = cv2.cvtColor(rgb, cv2.COLOR_YCrCb2RGB)
     rgb[rgb<0]=0

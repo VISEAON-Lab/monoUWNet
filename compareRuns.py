@@ -31,7 +31,7 @@ for data in data_sets:
     outFolder = os.path.join('/home/samitai/Work/myDIFFNet/Comparisons', folder1.split('/')[-1] + '_VS_' + 'others')
     if not os.path.exists(outFolder):
             os.makedirs(outFolder)
-
+    
     resultFiles1 = glob.glob(os.path.join(folder1, '*disp.{}'.format('png')))
 
     for file1 in resultFiles1:

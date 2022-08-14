@@ -126,6 +126,7 @@ def plotNumpy(image):
     im = np.squeeze(image)
     import matplotlib.pyplot as plt
     plt.imshow(im)
+    plt.axis('off')
     plt.show()
 
 def plotTensorScaled(image, crop=True):
@@ -179,9 +180,11 @@ def show_images(images, cols = 1, titles = None):
         # if image.ndim == 2:
             # plt.gray()
         plt.imshow(image)
+        plt.axis('off')
         a.set_title(title)
     fig.set_size_inches(np.array(fig.get_size_inches()) * n_images)
-    plt.show()
+    plt.axis('off')
+    # plt.show()
 
 
 def cropIm(image, rect):

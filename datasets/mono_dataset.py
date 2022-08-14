@@ -179,8 +179,11 @@ class MonoDataset(data.Dataset):
                 # change color sapce
 
         if self.dataName != 'kitti': # sc/uc/flatiron
-            frameNum=int(line[0].split(',')[0])
-            inputs["frameNum"]=frameNum
+            try:
+                frameNum=int(line[0].split(',')[1])
+                inputs["frameNum"]=frameNum
+            except:
+                frameNum=int(line[0].split(',')[0])
         else:
             inputs["frameNum"] = frame_index
         # adjusting intrinsics to match each scale in the pyramid

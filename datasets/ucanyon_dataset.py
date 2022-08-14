@@ -88,10 +88,10 @@ class UCanyonDataset(MonoDataset):
             #     hf_color = self.loader(color_hf_path)
             
             if 0:
-                color.save('rhf_'+str(0)+'.png')
-                for d0 in range(10, 250, 10):
+                color.save('rhf3_'+str(0)+'.png')
+                for d0 in range(5, 200, 10):
                     hf_color = pil.fromarray(homorphicFiltering(color, G, d0))
-                    hf_color.save('rhf_'+str(d0)+'.png')
+                    hf_color.save('rhf3_'+str(d0)+'.png')
 
             return hf_color
         return color
@@ -99,9 +99,9 @@ class UCanyonDataset(MonoDataset):
     def get_image_path(self, folder, frame_index, side):
         idx, frameName = folder.split(',')
         idx = int(idx)
-        try:
+        if idx+frame_index>-1 and idx+frame_index<len(self.filenames):
             frameName = self.filenames[idx+frame_index].split(',')[1]
-        except:
+        else:
             frameName = self.filenames[idx].split(',')[1]
         f_str = frameName
         image_path = os.path.join(
