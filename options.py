@@ -91,6 +91,9 @@ class MonodepthOptions:
         self.parser.add_argument("--use_corrLoss",
                                  help="if set, uses use_corrLoss for training",
                                  action="store_true")
+        self.parser.add_argument("--get_gt_pose",
+                                 help="if set, uses use_corrLoss for training",
+                                 action="store_true")
         self.parser.add_argument("--frame_ids",
                                  nargs="+",
                                  type=int,

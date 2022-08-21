@@ -65,7 +65,7 @@ class MonoDataset(data.Dataset):
 
         self.is_train = is_train
         self.img_ext = img_ext
-
+        self.poses= None
         self.loader = pil_loader
         self.to_tensor = transforms.ToTensor()
 
@@ -96,6 +96,26 @@ class MonoDataset(data.Dataset):
             self.load_depth = opts.use_depth
             self.use_hf = opts.use_homomorphic_filt
             self.do_flip = opts.do_flip
+
+            if opts.get_gt_pose:
+                self.poses = {}
+                with open(opts.data_path+ "/R_t.txt") as f:
+                    for line in f:
+                        T = np.array([float(val) for val in line.split()[1:]]).reshape((4, 4))
+                        self.poses[int(line.split()[0].split('_')[0])] = T
+                self.t_fwds={}
+                self.t_bwds={}
+                nposes = len(self.poses)
+                tlist = sorted(self.poses)
+                pre_pose=self.poses[tlist[0]]
+                for i, frameID in enumerate(tlist):
+                    curr_t = self.poses[frameID]
+                    prevFrameID = tlist[i-1]
+                    # next_t = next(self.poses[frameID])
+
+
+                    
+                
         else:
             self.do_flip=True
             self.load_depth = self.check_depth()
@@ -180,7 +200,7 @@ class MonoDataset(data.Dataset):
 
         if self.dataName != 'kitti': # sc/uc/flatiron
             try:
-                frameNum=int(line[0].split(',')[1])
+                frameNum=int(line[0].split(',')[1].split('.')[0])
                 inputs["frameNum"]=frameNum
             except:
                 frameNum=int(line[0].split(',')[0])
@@ -233,6 +253,29 @@ class MonoDataset(data.Dataset):
             stereo_T[0, 3] = side_sign * baseline_sign * 0.1
 
             inputs["stereo_T"] = torch.from_numpy(stereo_T)
+
+        if self.poses is not None:
+            skip = max(self.frame_idxs)
+            tlist = sorted(self.poses)
+            currFrame = inputs["frameNum"]
+            try:
+                ind = tlist.index(currFrame)
+            except:
+                print(f"frame {currFrame} not found...")
+                inputs["T_curr2prev"] = None
+                inputs["T_curr2next"] = None
+            prevInd = max(ind-skip, 0)
+            nextInd = min(ind+skip, len(tlist)-1)
+            prevFrame = tlist[ind-skip]
+            nextFrame = tlist[ind+skip]
+            currT = self.poses[currFrame]
+            prevT = self.poses[prevFrame]
+            nextT = self.poses[nextFrame]
+            invCurrT = np.linalg.inv(currT)
+
+            
+            inputs["T_curr2prev"] = (prevT @ invCurrT)
+            inputs["T_curr2next"] = (nextT @ invCurrT)
 
         return inputs
 
