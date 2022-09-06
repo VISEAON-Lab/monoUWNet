@@ -267,8 +267,8 @@ def homorphicFiltering(img, G=None, x=None):
     homo_filter = HomomorphicFilter()
     filter_params=[5,2]
     # random HF!!
-    if x is None:
-        x = random.randrange(1,50)*5
+    # if x is None: // change every image from now on
+    x = random.randrange(1,20)*5
 
     filter_params[0] = x
     img_filtered = homo_filter.filter(I=y, filter_params=filter_params).astype(np.float32)
