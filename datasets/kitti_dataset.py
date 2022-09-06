@@ -43,7 +43,7 @@ class KITTIDataset(MonoDataset):
 
         return os.path.isfile(velo_filename)
 
-    def get_color(self, folder, frame_index, side, do_flip):
+    def get_color(self, folder, frame_index, side, do_flip, x_hf=None):
         color = self.loader(self.get_image_path(folder, frame_index, side))
         if self.use_preEst_depth:
             # dehaze color
@@ -69,6 +69,10 @@ class KITTIRAWDataset(KITTIDataset):
         super(KITTIRAWDataset, self).__init__(*args, **kwargs)
 
     def get_image_path(self, folder, frame_index, side):
+        if frame_index<0:
+            frame_index=0
+        if frame_index>len(self.filenames)-1:
+            frame_index=len(self.filenames)-1
         #f_str = "{:010d}{}".format(frame_index, self.img_ext)
         self.img_ext = '.png'
         f_str = "{:010d}{}".format(frame_index, self.img_ext)
@@ -114,6 +118,10 @@ class KITTIOdomDataset(KITTIDataset):
         super(KITTIOdomDataset, self).__init__(*args, **kwargs)
 
     def get_image_path(self, folder, frame_index, side):
+        if frame_index<0:
+            frame_index=0
+        if frame_index>len(self.filenames)-1:
+            frame_index=len(self.filenames)-1
         f_str = "{:06d}{}".format(frame_index, '.png')
 
         image_path = os.path.join(

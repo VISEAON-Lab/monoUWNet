@@ -226,15 +226,15 @@ def evaluate(opt):
                 tot_corr_pred2ulap+=corr_pred2ulap[0]
                 for ptt in range(1, gc.shape[0], ds):
                     if dc[ptt]<8 and gc[ptt]<8:
-                        plt.plot(dc[ptt], bc[ptt], '.',color='r')
+                        #plt.plot(dc[ptt], bc[ptt], '.',color='r')
                         plt.plot(gc[ptt], bc[ptt], '.',color='b')
                         # plt.pause(0.05)
 
         if saveFig:
-            plt.plot(dc[ptt], bc[ptt], '.',color='r', label="predicted depth")
-            plt.plot(gc[ptt], bc[ptt], '.',color='b', label="ground truth")
+            #plt.plot(dc[ptt], bc[ptt], '.',color='r', label="predicted depth")
+            plt.plot(gc[ptt], bc[ptt], '.',color='b', label="ground truth points")
             plt.legend(loc="lower right")
-            plt.xlabel("Depth Points")
+            plt.xlabel("Depth Points [m]")
             plt.ylabel("ULAP")
             # plt.show()
             fig.savefig(save_dir + '/ulap2GTDepthPlot.png')

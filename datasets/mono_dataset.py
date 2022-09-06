@@ -266,8 +266,8 @@ class MonoDataset(data.Dataset):
                 inputs["T_curr2next"] = None
             prevInd = max(ind-skip, 0)
             nextInd = min(ind+skip, len(tlist)-1)
-            prevFrame = tlist[ind-skip]
-            nextFrame = tlist[ind+skip]
+            prevFrame = tlist[prevInd]
+            nextFrame = tlist[nextInd]
             currT = self.poses[currFrame]
             prevT = self.poses[prevFrame]
             nextT = self.poses[nextFrame]

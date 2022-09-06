@@ -105,6 +105,10 @@ class MonodepthOptions:
                                  type=int,
                                  help="batch size",
                                  default=12)
+        self.parser.add_argument("--alpha",
+                                 type=float,
+                                 help="alpha",
+                                 default=0.15)
         self.parser.add_argument("--learning_rate",
                                  type=float,
                                  help="learning rate",

@@ -99,10 +99,13 @@ class UCanyonDataset(MonoDataset):
     def get_image_path(self, folder, frame_index, side):
         idx, frameName = folder.split(',')
         idx = int(idx)
-        if idx+frame_index>-1 and idx+frame_index<len(self.filenames):
-            frameName = self.filenames[idx+frame_index].split(',')[1]
-        else:
-            frameName = self.filenames[idx].split(',')[1]
+        if idx+frame_index<0:
+            frame_index=0
+        if idx+frame_index>len(self.filenames)-1:
+            frame_index=0
+
+        frameName = self.filenames[idx+frame_index].split(',')[1]
+
         f_str = frameName
         image_path = os.path.join(
             self.data_path, 'imgs',
@@ -125,15 +128,20 @@ class UCanyonDataset(MonoDataset):
 
     
     def get_depth(self, folder, frame_index, side, do_flip):
-        depth_path = self.get_depth_path(folder, frame_index, side)
+        depth_path = self.get_depth_path(folder, frame_index, side) # abs_depth
         try:
-            depth_gt = pil.open(depth_path)
+            seara_abs_depth_path = depth_path.replace("_abs_depth","_SeaErra_abs_depth")
+            depth_gt = pil.open(seara_abs_depth_path)
         except:
             try:
-                depth_path = depth_path.replace("_abs_depth","")
-                depth_gt = pil.open(depth_path)
+                no_addition_depth_path = depth_path.replace("_abs_depth","")
+                depth_gt = pil.open(no_addition_depth_path)
+                        
             except:
-                return None
+                try:
+                    depth_gt = pil.open(depth_path) # abs_depth
+                except:
+                    return None
 
         depth_gt = depth_gt.resize(self.full_res_shape, pil.NEAREST)
         depth_gt = np.array(depth_gt).astype(np.float32)

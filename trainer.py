@@ -501,11 +501,12 @@ class Trainer:
         # mask3 = mask.expand(mask.shape[0], 3, mask.shape[2], mask.shape[3])
         abs_diff = torch.abs(target - pred)
         l1_loss = abs_diff.mean(1, True)
+        alpha = float(self.opt.alpha)
         if self.opt.no_ssim:
             reprojection_loss = l1_loss
         else:
             ssim_loss = self.ssim(pred, target).mean(1, True)
-            reprojection_loss = 0.85 * ssim_loss + 0.15 * l1_loss
+            reprojection_loss = (1-alpha) * ssim_loss + alpha * l1_loss
 
         # mask = disp
         # if mask is not None:
@@ -525,7 +526,7 @@ class Trainer:
         # if mask is not None:
         #     reprojection_loss[mask<1e-3]=0
         #     reprojection_loss[mask>15]=0
-        if 1:
+        if 0:
             rnd = np.random.randint(100)
             saveTensor(target,'local_variation_samples/'+str(rnd)+'_'+'rgb.png')
             saveTensor(pred,'local_variation_samples/'+str(rnd)+'_'+'rgb_pred.png')
