@@ -99,7 +99,7 @@ def test_simple(args):
         output_directory = os.path.dirname(args.image_path)
     elif os.path.isdir(args.image_path):
         # Searching folder for images
-        paths = glob.glob(os.path.join(args.image_path, '**/*.{}'.format('png')), recursive=True)
+        paths = glob.glob(os.path.join(args.image_path, '**/*.{}'.format('tiff')), recursive=True)
         output_directory = args.image_path
     else:
         raise Exception("Can not find args.image_path: {}".format(args.image_path))
@@ -164,7 +164,7 @@ def test_simple(args):
             #image = np.concatenate([rgb1, im], 0)
             # save a grey scale map for point cloud viz
             #depth_resized = depth_resized.squeeze().cpu().numpy()
-            scaled_disp = (50 / scaled_disp).squeeze().cpu().numpy()
+            scaled_disp = (scaled_disp).squeeze().cpu().numpy()
             #scaled_disp = scaled_disp.squeeze().cpu().numpy()
             im_grey = pil.fromarray(np.uint8((scaled_disp * 255)),'L')
             # name_grey_depth = os.path.join('results',"{}_grey_disp.png".format(image_name))
