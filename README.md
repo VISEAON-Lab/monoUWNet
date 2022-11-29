@@ -18,12 +18,12 @@ dname=FLC_4DS_tiny_sky
 date=20220706
 
 ##################################################3
-# # 1) basic
+1) basic
 
 echo "train diffnet flc2 pytorch"
 run_name=${date}_FLC_${dname}
 
-# echo "${run_name}_test"
+echo "${run_name}_test"
 python train.py --png \
 --model_name=$run_name \
 --data_path="/home/samitai/Work/Datasets/ANSFL/allData2" \
@@ -35,9 +35,9 @@ python train.py --png \
 --num_epochs=20 \
 --load_weights_folder="/home/samitai/Work/myDIFFNet/models/diffnet_1024x320" \
 --do_flip \
-# # # # # --use_corrLoss \
-# # # # # --use_lvw \
-# # # # --use_recons_net
+--use_corrLoss \
+--use_lvw \
+--use_recons_net
 
 for ds in uc flatiron tiny
 do
