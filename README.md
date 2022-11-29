@@ -26,14 +26,14 @@ run_name=${date}_FLC_${dname}
 echo "${run_name}_test"
 python train.py --png \
 --model_name=$run_name \
---data_path="/home/samitai/Work/Datasets/ANSFL/allData2" \
+--data_path=<datapath> \
 --dataset="uc" \
 --split=${dname} \
 --height=480 \
 --width=640 \
 --batch_size=8 \
 --num_epochs=20 \
---load_weights_folder="/home/samitai/Work/myDIFFNet/models/diffnet_1024x320" \
+--load_weights_folder=<initial weights Folder> \
 --do_flip \
 --use_corrLoss \
 --use_lvw \
@@ -46,8 +46,8 @@ do
     --model_name="${run_name}_eval_${ds}" \
     --dataset=uc \
     --eval_mono \
-    --load_weights_folder="/home/samitai/Work/myDIFFNet/models/${run_name}/models/weights_last" \
-    --data_path /home/samitai/Work/Datasets/ANSFL/allData2 \
+    --load_weights_folder=<weightsFolder> \
+    --data_path <datapath> \
     --save_pred_disps \
     --use_depth \
     --eval_split=${ds} \
