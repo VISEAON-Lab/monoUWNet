@@ -8,18 +8,27 @@ https://github.com/brandleyzhou/DIFFNet
 
 # requirements:
 matplotlib==3.4.2
+
 numpy==1.21.2
+
 opencv-python==4.5.2.52
+
 Pillow==8.4.0
+
 scikit-image==0.18.3
+
 scipy==1.7.1
+
 tensorboard==2.7.0
+
 tensorboardX==2.4
+
 torch==1.10.1
+
 torchvision==0.2.1
 
 
-Running training over all 4 FLC datasets together and evaluating on each one seperatly (ar all together):
+# Running training over all 4 FLC datasets together and evaluating on each one seperatly (ar all together):
 
 
 #!/bin/bash
