@@ -1,68 +1,57 @@
-shlomia: this is my private branch taken  from below work 
+# Self-Supervised Monocular Depth Underwater
+This repo is for Self-Supervised Monocular Depth Underwater paper which can be found here:
+https://arxiv.org/abs/2210.03206
 
-# DIFFNet
-
-This repo is for **[Self-Supervised Monocular Depth Estimation with Internal Feature Fusion(arXiv)](https://arxiv.org/pdf/2110.09482.pdf), BMVC2021**
-
- A new backbone for self-supervised depth estimation.
-
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/self-supervised-monocular-depthestimation/monocular-depth-estimation-on-kitti-eigen-1)](https://paperswithcode.com/sota/monocular-depth-estimation-on-kitti-eigen-1?p=self-supervised-monocular-depthestimation)
+The work is mostly based on DiffNet which can be found here:
+https://github.com/brandleyzhou/DIFFNet
 
 
-If you think it is not a bad work, please consider citing it.
-```
-@inproceedings{zhou_diffnet,
-    title={Self-Supervised Monocular Depth Estimation with Internal Feature Fusion},
-    author={Zhou, Hang and Greenwood, David and Taylor, Sarah},
-    booktitle={British Machine Vision Conference (BMVC)},
-    year={2021}
-    }
-
-```
-## Update:
-
-- [07-12-2021] A multi-gpu training version availible on multi-gpu branch.
 
 
-## Comparing with others
-![](images/table1.png)
-
-## Evaluation on selected hard cases:
-![](images/table2.png)
-
-## Trained weights
-
-- [diffnet_1024x320_ms_ttr](https://drive.google.com/file/d/1u4pizvk9xZ8bbyWLyjd0m_9hnm_mO9-Q/view?usp=sharing) (the SOTA one)
-- [diffnet_1024_320_ms](https://drive.google.com/file/d/1VR0BYXKyclvv1Gq2XcQCR-fvJuFQ80SI/view?usp=sharing)
-- [diffnet_640x192](https://drive.google.com/file/d/1ZQPZWsIy_KyjV-Et6FSCOPM4iATjDPn-/view?usp=sharing)
-- [diffnet_640x192_ms](https://drive.google.com/file/d/1_vh1F_cabTlEjBGXkHZOpAB1CMLmosxg/view?usp=sharing)
-- [diffnet_1024x320](https://drive.google.com/file/d/1SuyBMS3ZLYuZwgyGSpmNrag7ESjRUC52/view?usp=sharing)
-- [diffnet_1024x320_ttr](https://drive.google.com/file/d/1R0b0GYUxyZeaVCHQEELHevHoegwFi3qU/view?usp=sharing)
-
-## Setting up before training and testing
-
-- Data preparation: please refer to [monodepth2](https://github.com/nianticlabs/monodepth2)
-
-## Training:
-
-```
-sh start2train.sh
-```
-
-## Testing:
-
-```
-sh disp_evaluation.sh
-```
-## Infer a single depth map from a RGB:
-
-```
-sh test_sample.sh
-```
+Running training over all 4 FLC datasets together and evaluating on each one seperatly:
 
 
-#### Acknowledgement
- Thanks the authors for their works:
- - [monodepth2](https://github.com/nianticlabs/monodepth2)
- - [HRNet](https://github.com/HRNet/HRNet-Semantic-Segmentation)
+#!/bin/bash
+echo sleeping..
+sleep 18000
+dname=FLC_4DS_tiny_sky
+date=20220706
+
+##################################################3
+1) basic
+
+echo "train diffnet flc2 pytorch"
+run_name=${date}_FLC_${dname}
+
+echo "${run_name}_test"
+python train.py --png \
+--model_name=$run_name \
+--data_path=<datapath> \
+--dataset="uc" \
+--split=${dname} \
+--height=480 \
+--width=640 \
+--batch_size=8 \
+--num_epochs=20 \
+--load_weights_folder=<initial weights Folder> \
+--do_flip \
+--use_corrLoss \
+--use_lvw \
+--use_recons_net
+
+for ds in uc flatiron tiny
+do
+    echo "running flc_new evaluation on ${ds}"
+    python evaluate_depth.py \
+    --model_name="${run_name}_eval_${ds}" \
+    --dataset=uc \
+    --eval_mono \
+    --load_weights_folder=<weightsFolder> \
+    --data_path <datapath> \
+    --save_pred_disps \
+    --use_depth \
+    --eval_split=${ds} \
+    --eval_sky 
+done
+
 
