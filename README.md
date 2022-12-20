@@ -6,9 +6,19 @@ The work is mostly based on DiffNet which can be found here:
 https://github.com/brandleyzhou/DIFFNet
 
 
+# requirements:
+matplotlib==3.4.2
+numpy==1.21.2
+opencv-python==4.5.2.52
+Pillow==8.4.0
+scikit-image==0.18.3
+scipy==1.7.1
+tensorboard==2.7.0
+tensorboardX==2.4
+torch==1.10.1
+torchvision==0.2.1
 
-
-Running training over all 4 FLC datasets together and evaluating on each one seperatly:
+Running training over all 4 FLC datasets together and evaluating on each one seperatly (ar all together):
 
 
 #!/bin/bash
@@ -18,7 +28,7 @@ dname=FLC_4DS_tiny_sky
 date=20220706
 ds=FLC_4DS_tiny_sky
 ##################################################3
-1) basic
+# 1) train
 
 echo "train diffnet flc2 pytorch"
 run_name=${date}_FLC_${dname}
@@ -40,7 +50,7 @@ python train.py --png \
 --use_recons_net
 
 
-## option 1: run on each sub ds by it self
+# option 1: run on each sub ds by it self
 for ds in uc flatiron tiny
 do
     echo "running flc_new evaluation on ${ds}"
