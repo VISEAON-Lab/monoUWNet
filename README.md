@@ -28,7 +28,7 @@ dname=FLC_4DS_tiny_sky
 date=20220706
 ds=FLC_4DS_tiny_sky
 ##################################################3
-# 1) train
+# train
 
 echo "train diffnet flc2 pytorch"
 run_name=${date}_FLC_${dname}
@@ -50,7 +50,7 @@ python train.py --png \
 --use_recons_net
 
 
-# option 1: run on each sub ds by it self
+# evaluate - option 1: run on each sub ds by it self
 for ds in uc flatiron tiny
 do
     echo "running flc_new evaluation on ${ds}"
@@ -66,7 +66,7 @@ do
     --eval_sky 
 done
 
-# option 2: run on the unified ds:
+# evaluate - option 2: run on the unified ds:
 echo "running flc_new evaluation on ${ds}"
 python evaluate_depth.py \
 --model_name="${run_name}_eval_${ds}" \
