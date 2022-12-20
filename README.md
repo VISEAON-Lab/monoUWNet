@@ -16,7 +16,7 @@ echo sleeping..
 sleep 18000
 dname=FLC_4DS_tiny_sky
 date=20220706
-
+ds=FLC_4DS_tiny_sky
 ##################################################3
 1) basic
 
@@ -39,6 +39,8 @@ python train.py --png \
 --use_lvw \
 --use_recons_net
 
+
+## option 1: run on each sub ds by it self
 for ds in uc flatiron tiny
 do
     echo "running flc_new evaluation on ${ds}"
@@ -53,4 +55,17 @@ do
     --eval_split=${ds} \
     --eval_sky 
 done
+
+# option 2: run on the unified ds:
+echo "running flc_new evaluation on ${ds}"
+python evaluate_depth.py \
+--model_name="${run_name}_eval_${ds}" \
+--dataset=uc \
+--eval_mono \
+--load_weights_folder="/home/samitai/Work/myDIFFNet/models/${run_name}/models/weights_last" \
+--data_path /home/samitai/Work/Datasets/ANSFL/allData2 \
+--save_pred_disps \
+--use_depth \
+--eval_split=${ds} \
+--eval_sky 
 
