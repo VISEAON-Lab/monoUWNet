@@ -158,7 +158,7 @@ def plotNumpyDiff(image1, image2):
     images = np.squeeze([image1, image2, image_diff])
     show_images(images, 3)
 
-def show_images(images, cols = 1, titles = None, figsize=None, title_size=None):
+def show_images(images, cols = 1, titles = None):
     """Display a list of images in a single figure with matplotlib.
     
     Parameters
@@ -174,20 +174,14 @@ def show_images(images, cols = 1, titles = None, figsize=None, title_size=None):
     assert((titles is None)or (len(images) == len(titles)))
     n_images = len(images)
     if titles is None: titles = ['Image (%d)' % i for i in range(1,n_images + 1)]
-    if figsize is not None:
-        fig = plt.figure(figsize=figsize)
-    else:
-        fig = plt.figure()
-    if title_size is None:
-        title_size='20'
+    fig = plt.figure()
     for n, (image, title) in enumerate(zip(images, titles)):
         a = fig.add_subplot(int(cols), int(np.ceil(n_images//float(cols))), n + 1)
         # if image.ndim == 2:
             # plt.gray()
         plt.imshow(image)
         plt.axis('off')
-        title_font = {'fontname':'Arial', 'size':title_size}
-        a.set_title(title, **title_font)
+        a.set_title(title)
     fig.set_size_inches(np.array(fig.get_size_inches()) * n_images)
     plt.axis('off')
     # plt.show()

@@ -133,6 +133,7 @@ class UCanyonDataset(MonoDataset):
             seara_abs_depth_path = depth_path.replace("_abs_depth","_SeaErra_abs_depth")
             depth_gt = pil.open(seara_abs_depth_path)
         except:
+            # print(f"{seara_abs_depth_path} not available..")
             try:
                 no_addition_depth_path = depth_path.replace("_abs_depth","")
                 depth_gt = pil.open(no_addition_depth_path)

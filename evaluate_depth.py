@@ -161,9 +161,11 @@ def evaluate(opt):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     
-    saveFig=True
+    saveFig=False
     if saveFig:
-        fig = plt.figure()
+        # fig = plt.figure()
+        # fig = plt.figure(figsize=(16,9))
+        fig, ax = plt.subplots(figsize=(16, 9))
 
     # corr_loss = CorrelationLoss()
     tot_corr_gt2pred=0
@@ -185,6 +187,15 @@ def evaluate(opt):
             output = depth_decoder(encoder(input_color))
 
             pred_disp_0, depth = disp_to_depth(output[("disp", 0)], opt.min_depth, opt.max_depth)
+            ### TODO: replace back afetr!!!!
+            if 0: #### replace prediction with uwnet results!!!!!!
+                uwnetDepthPath = '/home/samitai/Work/UW-Net/out/test/20220913-000254/imgs/' + str(data['frameNum'][0].cpu().numpy())+'_uwnet_depth.npy'
+                # uwnetDepthPath = '/home/samitai/Work/UW-Net/out/test/20220913-005357/imgs/' + str(data['frameNum'][0].cpu().numpy())+'_uwnet_depth.npy'
+                xx = np.load(uwnetDepthPath)
+                xx = to_float_tensor(xx+1)
+                xx = xx.unsqueeze(0).unsqueeze(0)
+                depth = fn.interpolate(xx, size=(480, 640), mode='nearest')
+                pred_disp_0 = 1/depth
 
             if opt.use_recons_net:
                 J, coeffs = reconNet(input_color.to(device),depth.to(device) )
@@ -215,28 +226,34 @@ def evaluate(opt):
                 d = toNumpy(depth).flatten()
                 gt_rsz = fn.interpolate(gt, size=(480, 640), mode='nearest')
                 g = toNumpy(gt_rsz).flatten() # gc = gt; dc = pred; bc = bgr
-                gc = g[g>0]; bc = b[g>0]/4; dc = d[g>0]*4
-                ds = 5000
-                from scipy import stats
-                corr_gt2pred = stats.pearsonr(gc, dc)
-                corr_gt2ulap = stats.pearsonr(gc, bc)
-                corr_pred2ulap = stats.pearsonr(dc, bc)
-                tot_corr_gt2pred+=corr_gt2pred[0]
-                tot_corr_gt2ulap+=corr_gt2ulap[0]
-                tot_corr_pred2ulap+=corr_pred2ulap[0]
-                for ptt in range(1, gc.shape[0], ds):
-                    if dc[ptt]<8 and gc[ptt]<8:
-                        #plt.plot(dc[ptt], bc[ptt], '.',color='r')
-                        plt.plot(gc[ptt], bc[ptt], '.',color='b')
-                        # plt.pause(0.05)
+                if max(g)>0:
+                    gc = g[g>0]; bc = b[g>0]/4; dc = d[g>0]*4
+                    ds = 5000
+                    from scipy import stats
+                    corr_gt2pred = stats.pearsonr(gc, dc)
+                    corr_gt2ulap = stats.pearsonr(gc, bc)
+                    corr_pred2ulap = stats.pearsonr(dc, bc)
+                    tot_corr_gt2pred+=corr_gt2pred[0]
+                    tot_corr_gt2ulap+=corr_gt2ulap[0]
+                    tot_corr_pred2ulap+=corr_pred2ulap[0]
+                    for ptt in range(1, gc.shape[0], ds):
+                        if dc[ptt]<8 and gc[ptt]<8:
+                            #plt.plot(dc[ptt], bc[ptt], '.',color='r')
+                            plt.plot(gc[ptt], bc[ptt], '.',color='b')
+                            # plt.pause(0.05)
 
         if saveFig:
+            plt.rcParams['font.size'] = '20'
+            for label in (ax.get_xticklabels() + ax.get_yticklabels()):
+	            label.set_fontsize(30)
+            axis_font = {'fontname':'Arial', 'size':'16'}
             #plt.plot(dc[ptt], bc[ptt], '.',color='r', label="predicted depth")
-            plt.plot(gc[ptt], bc[ptt], '.',color='b', label="ground truth points")
-            plt.legend(loc="lower right")
-            plt.xlabel("Depth Points [m]")
-            plt.ylabel("ULAP")
+            # ax.plot(gc[ptt], bc[ptt], '.',color='b', label="ground truth points")
+            ax.legend(loc="lower right", fontsize=30)
+            plt.xlabel("Depth Points [m]", fontsize=30)
+            plt.ylabel("ULAP", fontsize=30)
             # plt.show()
+            
             fig.savefig(save_dir + '/ulap2GTDepthPlot.png')
 
         # end_time = time.time()
